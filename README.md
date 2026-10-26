@@ -2,18 +2,27 @@
 
 Anthology of Lean builds from the Proven-Commons org.
 
-This repo collects the Lean libraries built in the Proven-Commons org. It does
-not fork their code. Each library stays in its own upstream repo, and this
-repo pins a specific upstream commit for each one.
+## Purpose
 
-## Source of truth
+This repo exists to collect, in one place, all the libraries and software
+built in the Proven-Commons org in Lean: the parsers, codecs, extractors,
+and their executables listed in the table below.
 
-Development, claims, issues, and pull requests stay in the upstream repos at
-https://github.com/Proven-Commons. This repo is a compilation layer only. If
-this repo and an upstream repo disagree, the upstream repo wins.
+A reader who wants the whole collection should not have to track 21
+separate repos, each with its own version and toolchain. This repo gives
+that reader one place to fetch, one toolchain, and one joint build, with
+each item pinned to a specific upstream commit.
 
-Work continues in Proven-Commons. This repo is how Foundation-0 presents the
-whole collection in one place, with one toolchain and one joint build.
+This repo is a compilation, not a new development home and not a fork.
+Each library and piece of software stays in its own upstream repo, and
+development, claims, issues, and pull requests stay there. Attribution
+stays upstream. If this repo and an upstream repo disagree, the upstream
+repo wins.
+
+Scope: this repo covers the Proven-Commons library and software repos.
+It does not cover the Proven-Commons mission repo, which holds the org's
+structure and candidate lists, or its site repo. Contributors should go
+to the upstream repo for the piece they want to work on, not here.
 
 ## What a Lean rewrite is for
 
@@ -123,9 +132,9 @@ merged work, not work in progress.
 
 ## Status of this draft
 
-Draft only. Nothing in this draft has been pushed to
-Foundation-0/proven-commons. The live repo still contains only its initial
-README, two lines long.
+Draft only. This draft lives on branch `amp-sai/anthology-draft`, under
+draft PR #2, with remaining work tracked in issue #1. The main branch
+still contains only its initial README, two lines long.
 
 Unverified in this draft:
 
@@ -137,6 +146,5 @@ Unverified in this draft:
 - Pin freshness. Pins were checked 2026-10-26 and will drift as upstream
   main moves. Re-run `scripts/update-pins.py` before merging this draft.
 
-The next step after review is to push this draft to a branch in
-Foundation-0/proven-commons, run the joint build in CI or by hand, and
-merge only after that build passes.
+The next step after review is to run the joint build in CI or by hand,
+and merge only after that build passes.
