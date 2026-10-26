@@ -45,10 +45,6 @@ proof status that has not been checked for that repo.
 - Lake, which ships with the Lean toolchain.
 - Git.
 
-This draft was written without Lake on the drafting machine, so the joint
-build below has not been run yet. The first build, in CI or by a reviewer
-with Lake installed, is the check that matters. See "Status of this draft".
-
 ## Use
 
 Fetch the pinned libraries:
@@ -69,9 +65,9 @@ Build one library on its own, from its fetched copy:
 lake build --dir .lake/packages/ip
 ```
 
-The package names in `lakefile.toml` differ from the repo names in four
+The package names in `lakefile.toml` differ from the repo names in five
 cases: `redis` is package `resp`, `utf` is package `utf8`, `rfc` is package
-`rfc3339`, and `zip` is package `zip-pilot` with `tar` as `tar-pilot`. The
+`rfc3339`, `zip` is package `zip-pilot`, and `tar` is package `tar-pilot`. The
 table uses repo names. The lakefile uses package names.
 
 ## Update pins
@@ -135,23 +131,18 @@ merged work, not work in progress.
 
 ## Status
 
-This repo is on branch `amp-sai/anthology-draft`, under PR #2, with
-remaining work tracked in issue #1. The main branch still contains only
-its initial README, two lines long, until PR #2 merges.
-
-Build, verified twice on Lean 4.35.0, at the pinned commits:
+Build record for the pins in `lakefile.toml`, checked 2026-10-26 on
+Lean 4.35.0. Remaining work is tracked in issue #1.
 
 - `lake update` fetched all 18 requirements with no errors. The
-  generated `lake-manifest.json` is committed on this branch and matches
-  the lakefile pins.
+  committed `lake-manifest.json` matches the lakefile pins.
 - `lake build Anthology` passed, 101 jobs. Warnings are linter warnings,
   mostly unused simp arguments in WebSocket, and deprecation warnings
   in ZipPilot.
-- `scripts/build-all.sh` builds all 18 packages on their own. That run
-  was verified by the PR reviewer. A second run on this machine also
-  passed, printing "All packages built."
-- `scripts/update-pins.py` reports no pin changes, so the pins still
-  match upstream main HEAD as of the last check on 2026-10-26.
+- `scripts/build-all.sh` built all 18 packages on their own, on two
+  separate machines.
+- `scripts/update-pins.py` reported no pin changes, so the pins matched
+  upstream main HEAD as of 2026-10-26.
 
 Proof scan, limited scope, at the pinned commits:
 
@@ -161,8 +152,14 @@ Proof scan, limited scope, at the pinned commits:
   packages (bencode 24, codec 38, protobuf 12, rfc3339 33, semver 17,
   utf8 36) and 2 are comments stating that no sorry is present. The
   Spec definition files that proof modules import contain no sorry.
-- The Spec.lean files hold statements only and are not part of the
-  built library targets.
+- `lake build Anthology` builds each package's main library only. It
+  does not compile any package's `Proofs` library. `scripts/build-all.sh`
+  builds each package's upstream default targets. Those include `Proofs`
+  for 13 of the 14 packages that have one, but not bencode, whose
+  default target is its executable only.
+- The root Spec.lean files hold the statements, with `sorry`, by
+  upstream design. The `Proofs` libraries prove them under the same
+  names.
 - A `#print axioms` check for each library's main theorems was not
   run. That check stays open in issue #1, and it is the one item that
   keeps this collection from being described as fully proof-audited.
@@ -170,5 +167,5 @@ Proof scan, limited scope, at the pinned commits:
   that check.
 
 Pin freshness: pins were checked 2026-10-26 and will drift as upstream
-main moves. Re-run `scripts/update-pins.py` before merging, and rebuild
-after any pin change. Do not merge on a stale pin check alone.
+main moves. Re-run `scripts/update-pins.py` before trusting the pins,
+and rebuild after any pin change.
