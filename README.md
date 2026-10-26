@@ -98,7 +98,7 @@ workspace works without dependency conflicts.
 | Repo | What it is | Pinned commit | In workspace |
 | --- | --- | --- | --- |
 | bencode | Lean Bencode parser | de718a10ccbb | Yes |
-| codec | Lean codec | 74ae50b94b1 | Yes |
+| codec | Lean codec | 74ae50b94b14 | Yes |
 | csv | Lean CSV parser and printer (RFC 4180) | 4ceedb42f999 | Yes |
 | dns | Lean DNS wire header and question parser (RFC 1035) | a7cad62c0164 | Yes |
 | ip | Lean IP address parser and canonical printer | 09f2a06fddcc | Yes |
