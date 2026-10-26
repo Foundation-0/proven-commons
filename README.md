@@ -1,2 +1,142 @@
 # proven-commons
-Anthology of lean builds from the @proven-commons org.
+
+Anthology of Lean builds from the Proven-Commons org.
+
+This repo collects the Lean libraries built in the Proven-Commons org. It does
+not fork their code. Each library stays in its own upstream repo, and this
+repo pins a specific upstream commit for each one.
+
+## Source of truth
+
+Development, claims, issues, and pull requests stay in the upstream repos at
+https://github.com/Proven-Commons. This repo is a compilation layer only. If
+this repo and an upstream repo disagree, the upstream repo wins.
+
+Work continues in Proven-Commons. This repo is how Foundation-0 presents the
+whole collection in one place, with one toolchain and one joint build.
+
+## What a Lean rewrite is for
+
+Lean lets code and a proof about that code live together. A parser takes
+input it does not control, such as a file or a network message. Tests check
+only the inputs someone thought to try. A proof checks a stated property for
+every input. That is why these libraries are rebuilt in Lean: to turn a
+parser from something that seems to work into something whose stated
+behavior is guaranteed for all inputs.
+
+A proof only proves the properties that were written down. It does not prove
+the specification itself is right, and it does not make the code fast. The
+table below uses each upstream repo's own description. It does not claim a
+proof status that has not been checked for that repo.
+
+## Requirements
+
+- A Lean toolchain manager, such as elan, that can install the toolchain in
+  `lean-toolchain`.
+- Lake, which ships with the Lean toolchain.
+- Git.
+
+This draft was written without Lake on the drafting machine, so the joint
+build below has not been run yet. The first build, in CI or by a reviewer
+with Lake installed, is the check that matters. See "Status of this draft".
+
+## Use
+
+Fetch the pinned libraries:
+
+```
+lake update
+```
+
+Build the whole collection through the aggregator library:
+
+```
+lake build Anthology
+```
+
+Build one library on its own, from its fetched copy:
+
+```
+lake build --dir .lake/packages/ip
+```
+
+The package names in `lakefile.toml` differ from the repo names in four
+cases: `redis` is package `resp`, `utf` is package `utf8`, `rfc` is package
+`rfc3339`, and `zip` is package `zip-pilot` with `tar` as `tar-pilot`. The
+table uses repo names. The lakefile uses package names.
+
+## Update pins
+
+Pins are a point in time snapshot, checked 2026-10-26. Upstream moves, so a
+pin goes stale. To refresh all pins to the current upstream main branch:
+
+```
+python3 scripts/update-pins.py
+```
+
+Review the resulting diff before committing it. A pin update is a change to
+what this repo certifies, not a routine bump. Run `lake update` and
+`lake build Anthology` after a pin update, and commit the generated
+`lake-manifest.json` with the new pins.
+
+## Libraries
+
+All 18 libraries with a lakefile on upstream main are included as Lake
+requirements. All use toolchain `leanprover/lean4:v4.35.0` upstream, and
+none of them requires another library in this list, which is why a single
+workspace works without dependency conflicts.
+
+| Repo | What it is | Pinned commit | In workspace |
+| --- | --- | --- | --- |
+| bencode | Lean Bencode parser | de718a10ccbb | Yes |
+| codec | Lean codec | 74ae50b94b1 | Yes |
+| csv | Lean CSV parser and printer (RFC 4180) | 4ceedb42f999 | Yes |
+| dns | Lean DNS wire header and question parser (RFC 1035) | a7cad62c0164 | Yes |
+| ip | Lean IP address parser and canonical printer | 09f2a06fddcc | Yes |
+| json | Lean JSON | 4642e51aa9d3 | Yes |
+| pep440 | Lean PEP 440 version parser and precedence | 3ab869050a06 | Yes |
+| png | Lean PNG chunk parser with CRC-32 check | df3035120ec6 | Yes |
+| protobuf | Lean Protobuf wire format codec | babcab706e42 | Yes |
+| redis | Lean Redis | 7ff41f249a92 | Yes |
+| rfc | Lean RFC 3339 timestamp parser | 79f30cd0fbbd | Yes |
+| semver | Lean semver | df74c98d5521 | Yes |
+| tar | Lean-verified tar (ustar) extractor with a proved no-escape extraction gate | 7517a86223e6 | Yes |
+| toml | Lean TOML parser and printer | ca8a615c0492 | Yes |
+| utf | Lean UTF-8 codec | 276115161f6c | Yes |
+| uuid | Lean UUID parser and printer (RFC 9562) | b5478df3c95b | Yes |
+| websocket | Lean WebSocket frame parser (RFC 6455, section 5) | b8db7cd36428 | Yes |
+| zip | Lean zip | 2cf824fde49f | Yes |
+
+Three more upstream repos are listed here but are not requirements yet,
+because their main branch is a README only, with no lakefile:
+
+| Repo | What it is | Main branch head |
+| --- | --- | --- |
+| cbor | Lean CBOR decoder (RFC 8949) | 442c4fb80407 |
+| http | Lean HTTP request-line and header parser (RFC 9112) | e3a22428d5db |
+| messagepack | Lean MessagePack decoder | 491201adeddd |
+
+Add one of these to `lakefile.toml` and `Anthology.lean` when its upstream
+main branch gains a lakefile and a library module. Do not add a branch
+commit as a pin: pins track upstream main, so the anthology always reflects
+merged work, not work in progress.
+
+## Status of this draft
+
+Draft only. Nothing in this draft has been pushed to
+Foundation-0/proven-commons. The live repo still contains only its initial
+README, two lines long.
+
+Unverified in this draft:
+
+- The joint build. Lake and Lean were not installed on the drafting
+  machine, so `lake update` and `lake build Anthology` have not been run.
+- Per-library proof status. The table repeats upstream descriptions. It
+  does not verify that each library's claimed proofs are present at the
+  pinned commit.
+- Pin freshness. Pins were checked 2026-10-26 and will drift as upstream
+  main moves. Re-run `scripts/update-pins.py` before merging this draft.
+
+The next step after review is to push this draft to a branch in
+Foundation-0/proven-commons, run the joint build in CI or by hand, and
+merge only after that build passes.

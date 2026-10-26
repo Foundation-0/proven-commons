@@ -1,0 +1,96 @@
+name = "proven-commons"
+version = "0.1.0"
+defaultTargets = ["Anthology"]
+
+[[lean_lib]]
+name = "Anthology"
+
+[[require]]
+name = "bencode"
+git = "https://github.com/Proven-Commons/bencode"
+rev = "de718a10ccbbd837c8b9eda32674254db7cf619a"
+
+[[require]]
+name = "codec"
+git = "https://github.com/Proven-Commons/codec"
+rev = "74ae50b94b14dcf2c916865b6e7a95b42fabed9e"
+
+[[require]]
+name = "csv"
+git = "https://github.com/Proven-Commons/csv"
+rev = "4ceedb42f999cc35a6a606396d866a3a69961e78"
+
+[[require]]
+name = "dns"
+git = "https://github.com/Proven-Commons/dns"
+rev = "a7cad62c0164cd0c1ba5ba4c838e11472741dea1"
+
+[[require]]
+name = "ip"
+git = "https://github.com/Proven-Commons/ip"
+rev = "09f2a06fddccb8bdace48de5672eef3e8c2ce4f2"
+
+[[require]]
+name = "json"
+git = "https://github.com/Proven-Commons/json"
+rev = "4642e51aa9d3e8f566b06707e7ec3537a799117c"
+
+[[require]]
+name = "pep440"
+git = "https://github.com/Proven-Commons/pep440"
+rev = "3ab869050a0625b0cb889c44e0cf215799d67f6c"
+
+[[require]]
+name = "png"
+git = "https://github.com/Proven-Commons/png"
+rev = "df3035120ec6a42abb42e75b496e66cb5f2cb5fb"
+
+[[require]]
+name = "protobuf"
+git = "https://github.com/Proven-Commons/protobuf"
+rev = "babcab706e425b670da74b3ea0de1e9e4a0e61fb"
+
+[[require]]
+name = "resp"
+git = "https://github.com/Proven-Commons/redis"
+rev = "7ff41f249a9236f75911c002e9c1052349781f13"
+
+[[require]]
+name = "rfc3339"
+git = "https://github.com/Proven-Commons/rfc"
+rev = "79f30cd0fbbd01ecfcf10bd8c98693fe8daf4238"
+
+[[require]]
+name = "semver"
+git = "https://github.com/Proven-Commons/semver"
+rev = "df74c98d5521710895d90a216fa5cad1c31e44f6"
+
+[[require]]
+name = "tar-pilot"
+git = "https://github.com/Proven-Commons/tar"
+rev = "7517a86223e6741b0a6b5c0b3b0fabcf68347bee"
+
+[[require]]
+name = "toml"
+git = "https://github.com/Proven-Commons/toml"
+rev = "ca8a615c0492e7717034ef33b602a1bf13fbc298"
+
+[[require]]
+name = "utf8"
+git = "https://github.com/Proven-Commons/utf"
+rev = "276115161f6c33f3b6f80436ebe07474fe5085e9"
+
+[[require]]
+name = "uuid"
+git = "https://github.com/Proven-Commons/uuid"
+rev = "b5478df3c95bb4117781cba4ebe908d8cf067062"
+
+[[require]]
+name = "websocket"
+git = "https://github.com/Proven-Commons/websocket"
+rev = "b8db7cd364286818d88f5fdb358079943bc4d189"
+
+[[require]]
+name = "zip-pilot"
+git = "https://github.com/Proven-Commons/zip"
+rev = "2cf824fde49fb336c217c89190891ddb753cfe10"
