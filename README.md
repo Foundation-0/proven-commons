@@ -105,8 +105,9 @@ CI runs these on every pull request and on every push to main:
   default targets, then its `Proofs` library if it has one. This is the
   step that compiles the proofs.
 
-A weekly scheduled run also runs `scripts/update-pins.py --check`, and
-fails when upstream main has moved past a pin.
+A weekly scheduled run runs all of the checks above, plus
+`scripts/update-pins.py --check`, and fails when upstream main has
+moved past a pin.
 
 ## Libraries
 
@@ -178,9 +179,9 @@ Proof scan, limited scope, at the pinned commits:
   Spec definition files that proof modules import contain no sorry.
 - `lake build Anthology` builds each package's main library only. It
   does not compile any package's `Proofs` library. `scripts/build-all.sh`
-  builds each package's upstream default targets. Those include `Proofs`
-  for 13 of the 14 packages that have one, but not bencode, whose
-  default target is its executable only.
+  builds each package's upstream default targets, then its `Proofs`
+  library explicitly if it has one, so it builds `Proofs` for all 14
+  packages that have one, including bencode.
 - The root Spec.lean files hold the statements, with `sorry`, by
   upstream design. The `Proofs` libraries prove them under the same
   names.
