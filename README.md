@@ -82,7 +82,32 @@ python3 scripts/update-pins.py
 Review the resulting diff before committing it. A pin update is a change to
 what this repo certifies, not a routine bump. Run `lake update` and
 `lake build Anthology` after a pin update, and commit the generated
-`lake-manifest.json` with the new pins.
+`lake-manifest.json` with the new pins. The script also updates the
+pinned commit column of the library table below.
+
+To check for drift without changing anything, which exits 1 if any pin is
+behind upstream main:
+
+```
+python3 scripts/update-pins.py --check
+```
+
+## Checks
+
+CI runs these on every pull request and on every push to main:
+
+- `scripts/check-consistency.py` checks that `lakefile.toml`,
+  `lake-manifest.json` and the library table below record the same pins.
+  It needs no network and no Lean toolchain.
+- `lake build Anthology` builds each package's main library. It does not
+  compile any package's `Proofs` library.
+- `scripts/build-all.sh` builds each package on its own: its upstream
+  default targets, then its `Proofs` library if it has one. This is the
+  step that compiles the proofs.
+
+A weekly scheduled run runs all of the checks above, plus
+`scripts/update-pins.py --check`, and fails when upstream main has
+moved past a pin.
 
 ## Libraries
 
@@ -154,9 +179,9 @@ Proof scan, limited scope, at the pinned commits:
   Spec definition files that proof modules import contain no sorry.
 - `lake build Anthology` builds each package's main library only. It
   does not compile any package's `Proofs` library. `scripts/build-all.sh`
-  builds each package's upstream default targets. Those include `Proofs`
-  for 13 of the 14 packages that have one, but not bencode, whose
-  default target is its executable only.
+  builds each package's upstream default targets, then its `Proofs`
+  library explicitly if it has one, so it builds `Proofs` for all 14
+  packages that have one, including bencode.
 - The root Spec.lean files hold the statements, with `sorry`, by
   upstream design. The `Proofs` libraries prove them under the same
   names.
