@@ -8,8 +8,8 @@ This repo exists to collect, in one place, all the libraries and software
 built in the Proven-Commons org in Lean: the parsers, codecs, extractors,
 and their executables listed in the table below.
 
-A reader who wants the whole collection should not have to track 21
-separate repos, each with its own version and toolchain. This repo gives
+A reader who wants the whole collection should not have to track 24
+separate library repos, each with its own version and toolchain. This repo gives
 that reader one place to fetch, one toolchain, and one joint build, with
 each item pinned to a specific upstream commit.
 
@@ -116,35 +116,59 @@ workspace works without dependency conflicts.
 | websocket | Lean WebSocket frame parser (RFC 6455, section 5) | b8db7cd36428 | Yes |
 | zip | Lean zip | 2cf824fde49f | Yes |
 
-Three more upstream repos are listed here but are not requirements yet,
-because their main branch is a README only, with no lakefile:
+Six more upstream library repos are listed here but are not requirements
+yet, because their main branch is a README only, with no lakefile:
 
 | Repo | What it is | Main branch head |
 | --- | --- | --- |
+| bech32 | Lean rewrite - bech32: Bech32 and Bech32m strings (BIP 173, BIP 350) | 0097276e1fc4 |
 | cbor | Lean CBOR decoder (RFC 8949) | 442c4fb80407 |
+| hostname | Lean hostname | 9be3e5840e39 |
 | http | Lean HTTP request-line and header parser (RFC 9112) | e3a22428d5db |
 | messagepack | Lean MessagePack decoder | 491201adeddd |
+| punycode | Lean punycode | 6b5bf7b24ab2 |
 
 Add one of these to `lakefile.toml` and `Anthology.lean` when its upstream
 main branch gains a lakefile and a library module. Do not add a branch
 commit as a pin: pins track upstream main, so the anthology always reflects
 merged work, not work in progress.
 
-## Status of this draft
+## Status
 
-Draft only. This draft lives on branch `amp-sai/anthology-draft`, under
-draft PR #2, with remaining work tracked in issue #1. The main branch
-still contains only its initial README, two lines long.
+This repo is on branch `amp-sai/anthology-draft`, under PR #2, with
+remaining work tracked in issue #1. The main branch still contains only
+its initial README, two lines long, until PR #2 merges.
 
-Unverified in this draft:
+Build, verified twice on Lean 4.35.0, at the pinned commits:
 
-- The joint build. Lake and Lean were not installed on the drafting
-  machine, so `lake update` and `lake build Anthology` have not been run.
-- Per-library proof status. The table repeats upstream descriptions. It
-  does not verify that each library's claimed proofs are present at the
-  pinned commit.
-- Pin freshness. Pins were checked 2026-10-26 and will drift as upstream
-  main moves. Re-run `scripts/update-pins.py` before merging this draft.
+- `lake update` fetched all 18 requirements with no errors. The
+  generated `lake-manifest.json` is committed on this branch and matches
+  the lakefile pins.
+- `lake build Anthology` passed, 101 jobs. Warnings are linter warnings,
+  mostly unused simp arguments in WebSocket, and deprecation warnings
+  in ZipPilot.
+- `scripts/build-all.sh` builds all 18 packages on their own. That run
+  was verified by the PR reviewer. A second run on this machine also
+  passed, printing "All packages built."
+- `scripts/update-pins.py` reports no pin changes, so the pins still
+  match upstream main HEAD as of the last check on 2026-10-26.
 
-The next step after review is to run the joint build in CI or by hand,
-and merge only after that build passes.
+Proof scan, limited scope, at the pinned commits:
+
+- No actual `sorry` or `admit` in code outside Spec files, and no
+  custom `axiom` declarations in the 18 packages. A word scan finds
+  162 `sorry` matches, of which 160 are in the root Spec.lean of six
+  packages (bencode 24, codec 38, protobuf 12, rfc3339 33, semver 17,
+  utf8 36) and 2 are comments stating that no sorry is present. The
+  Spec definition files that proof modules import contain no sorry.
+- The Spec.lean files hold statements only and are not part of the
+  built library targets.
+- A `#print axioms` check for each library's main theorems was not
+  run. That check stays open in issue #1, and it is the one item that
+  keeps this collection from being described as fully proof-audited.
+  The table above repeats upstream descriptions. It does not replace
+  that check.
+
+Pin freshness: pins were checked 2026-10-26 and will drift as upstream
+main moves. Re-run `scripts/update-pins.py` before merging, and rebuild
+after any pin change. Do not merge on a stale pin check alone.
