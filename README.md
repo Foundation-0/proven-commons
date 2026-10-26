@@ -86,7 +86,31 @@ python3 scripts/update-pins.py
 Review the resulting diff before committing it. A pin update is a change to
 what this repo certifies, not a routine bump. Run `lake update` and
 `lake build Anthology` after a pin update, and commit the generated
-`lake-manifest.json` with the new pins.
+`lake-manifest.json` with the new pins. The script also updates the
+pinned commit column of the library table below.
+
+To check for drift without changing anything, which exits 1 if any pin is
+behind upstream main:
+
+```
+python3 scripts/update-pins.py --check
+```
+
+## Checks
+
+CI runs these on every pull request and on every push to main:
+
+- `scripts/check-consistency.py` checks that `lakefile.toml`,
+  `lake-manifest.json` and the library table below record the same pins.
+  It needs no network and no Lean toolchain.
+- `lake build Anthology` builds each package's main library. It does not
+  compile any package's `Proofs` library.
+- `scripts/build-all.sh` builds each package on its own: its upstream
+  default targets, then its `Proofs` library if it has one. This is the
+  step that compiles the proofs.
+
+A weekly scheduled run also runs `scripts/update-pins.py --check`, and
+fails when upstream main has moved past a pin.
 
 ## Libraries
 
