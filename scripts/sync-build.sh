@@ -23,13 +23,26 @@ kept=""
 cp repos.json "$tmp/previous.json"
 cp audit.json "$tmp/previous-audit.json"
 
-python3 scripts/sync.py --previous "$tmp/previous.json" --report "$tmp/changes.md" || exit 1
+# Upstream is read once, here. Every later decision in this run reuses
+# what this read found, so the pins that are built are the pins written.
+# A proof library that an earlier sync held out of AnthologyProofs stays
+# out while its pin does not move, so an unchanged upstream changes
+# nothing and takes the early exit.
+python3 scripts/sync.py --previous "$tmp/previous.json" --save-found "$tmp/found.json" --report "$tmp/changes.md" || exit 1
 # shellcheck disable=SC2086
 if git diff --quiet -- $FILES; then
   echo "Upstream has not moved. Nothing to build."
   for f in $FILES; do cp "$f" "$out/$f"; done
   exit 0
 fi
+
+# Decide again from what the read found, with the given flags, and
+# without the network.
+decide() {
+  python3 scripts/sync.py --previous "$tmp/previous.json" --found "$tmp/found.json" --report "$tmp/changes.md" "$@"
+}
+# Something moved, so test again every proof library held out before.
+decide --hold-joint > /dev/null || exit 1
 
 result() { if [ "$2" -eq 0 ]; then echo "- $1: passed" >> "$tmp/results.md"; else echo "- $1: **failed**" >> "$tmp/results.md"; fi; }
 : > "$tmp/results.md"
@@ -48,7 +61,7 @@ if [ -s "$tmp/failed" ]; then
   kept=$(tr '\n' ' ' < "$tmp/failed" | sed 's/ *$//')
   echo "Keeping the current pin of: $kept"
   # shellcheck disable=SC2086
-  python3 scripts/sync.py --previous "$tmp/previous.json" --report "$tmp/changes.md" --keep-pin $kept || exit 1
+  decide --keep-pin $kept --hold-joint > /dev/null || exit 1
   lake update
   scripts/build-all.sh
   status=$?
@@ -62,13 +75,17 @@ joint=$?
 if [ "$joint" -ne 0 ]; then
   # Unique module names do not rule out two packages declaring the same
   # theorem name. Start AnthologyProofs empty, add the candidate proof
-  # libraries back one at a time, those it imported before first, and
-  # keep each one the joint build still accepts.
+  # libraries back one at a time, and keep each one the joint build still
+  # accepts. Those it imported before and whose pin did not move go first,
+  # so the library whose new pin brings a clash is the one held out.
   candidates=$(python3 - "$tmp/previous.json" <<'PY'
 import json, sys
-before = {r["repo"] for r in json.load(open(sys.argv[1])).get("repos", []) if r.get("joint_proofs")}
-now = [r["repo"] for r in json.load(open("repos.json"))["repos"] if r.get("joint_proofs")]
-print(" ".join(sorted(now, key=lambda r: (r not in before, r))))
+before = {r["repo"]: r for r in json.load(open(sys.argv[1])).get("repos", [])}
+now = [r for r in json.load(open("repos.json"))["repos"] if r.get("joint_proofs")]
+def order(r):
+    b = before.get(r["repo"], {})
+    return (not b.get("joint_proofs"), b.get("rev") != r["rev"], r["repo"])
+print(" ".join(r["repo"] for r in sorted(now, key=order)))
 PY
 )
   if [ -n "$candidates" ]; then
@@ -76,13 +93,14 @@ PY
     for c in $candidates; do
       # shellcheck disable=SC2086
       trial=$(printf '%s\n' $held | grep -vx "$c" | tr '\n' ' ')
+      echo "Trying AnthologyProofs with the proof library of $c"
       # shellcheck disable=SC2086
-      python3 scripts/sync.py --previous "$tmp/previous.json" --keep-pin $kept --hold-joint $trial > /dev/null || exit 1
-      if lake build AnthologyProofs > /dev/null 2>&1; then held="$trial"; fi
+      decide --keep-pin $kept --hold-joint $trial > /dev/null || exit 1
+      if lake build AnthologyProofs; then held="$trial"; fi
     done
     held=$(printf '%s' "$held" | sed 's/ *$//')
     # shellcheck disable=SC2086
-    python3 scripts/sync.py --previous "$tmp/previous.json" --report "$tmp/changes.md" --keep-pin $kept --hold-joint $held || exit 1
+    decide --keep-pin $kept --hold-joint $held || exit 1
     lake build AnthologyProofs
     joint=$?
     if [ -n "$held" ]; then

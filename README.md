@@ -146,10 +146,12 @@ table and `lake-manifest.json`. It then builds everything, runs the proof
 audit, and opens a pull request, or updates the open one, on the branch
 `sync/upstream`. If a package's new head fails to build, it keeps that
 package at its current pin and says so in the pull request. If
-`AnthologyProofs` fails to build with a proof library that has just
-become eligible, which happens when two packages declare the same
-theorem name, it keeps that library out and says so. The pull request
-lists each pin move with a link to the upstream diff.
+`AnthologyProofs` fails to build with a proof library, which happens
+when two packages declare the same theorem name, it keeps that library
+out and says so, and it keeps first the libraries that were already in
+and whose pin did not move. A library held out is tried again whenever
+a sync finds anything else to change. The pull request lists each pin
+move with a link to the upstream diff.
 
 A pin update changes what this repo certifies, so a sync pull request is
 not a routine bump. It merges like any other, under the org's merge SOP:

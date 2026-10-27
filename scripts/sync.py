@@ -3,7 +3,8 @@
 
 Run from the repo root:
 
-    python3 scripts/sync.py [--check] [--report FILE] [--keep-pin REPO ...] [--hold-joint REPO ...]
+    python3 scripts/sync.py [--check] [--report FILE] [--keep-pin REPO ...] [--hold-joint [REPO ...]]
+                            [--save-found FILE | --found FILE]
     python3 scripts/sync.py --render
 
 The default run lists every public repo in the org, fetches the head of
@@ -21,8 +22,13 @@ build: each keeps its current pin, or stays out of the workspace if it has
 none. --hold-joint names repos whose proof library AnthologyProofs
 leaves out because the joint proof build fails with it: two packages can
 declare the same theorem name even when their module names differ.
---previous names the repos.json to compare with (default: the one in the
-repo).
+Without --hold-joint, a library held out before stays out while its pin
+does not move, so an unchanged upstream reproduces the last state;
+--hold-joint with no names tries every one again. --save-found
+writes what was read from upstream to a file, and --found reads it back
+instead of reading upstream again, so that later decisions in one sync
+see the same upstream. --previous names the repos.json to compare with
+(default: the one in the repo).
 
 A repo joins the workspace when its default branch has a lakefile.toml
 and a lean-toolchain, it uses the workspace toolchain, and every
@@ -286,10 +292,10 @@ def read_commit(root):
     }
 
 
-def discover_one(meta, cfg, old, keep, tmp):
+def discover_one(meta, cfg, old, tmp):
     """Inspect one repo's proposed pin, and its current pin when that
     differs. The proposed pin is its default branch head, unless sync.toml
-    holds it or --keep-pin keeps it."""
+    holds it."""
     name = meta["name"]
     url = f"{git_base(cfg)}/{name}"
     entry = {"meta": meta, "url": url, "hold": cfg["hold"].get(name)}
@@ -303,16 +309,12 @@ def discover_one(meta, cfg, old, keep, tmp):
         return entry
     entry["head"] = out.split()[0]
     current = old.get("rev") if old.get("state") == "included" else None
+    entry["was_included"] = current is not None
     want = entry["head"]
     if entry["hold"]:
         want = entry["hold"].get("rev", "")
         if not re.fullmatch(r"[0-9a-f]{40}", want):
             raise SyncError(f"sync.toml: hold.{name}.rev must be a full 40-character commit hash")
-    elif name in keep:
-        if not current:
-            entry["proposed"] = {"rev": want, "error": "its default branch head fails to build in the workspace"}
-            return entry
-        want = current
     for key, rev in (("proposed", want), ("current", current)):
         if key == "current" and (not rev or rev == want):
             continue
@@ -329,14 +331,31 @@ def discover_one(meta, cfg, old, keep, tmp):
     return entry
 
 
-def discover(cfg, previous, keep, repos_file=None):
+def discover(cfg, previous, repos_file=None):
     """List the org and inspect every repo it does not exclude."""
     prev = {r["repo"]: r for r in previous.get("repos", [])}
     metas = [m for m in list_org(cfg["org"], repos_file) if m["name"] not in cfg["exclude"]]
     with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(8) as pool:
-        jobs = {m["name"]: pool.submit(discover_one, m, cfg, prev.get(m["name"], {}), keep, tmp)
+        jobs = {m["name"]: pool.submit(discover_one, m, cfg, prev.get(m["name"], {}), tmp)
                 for m in metas}
         return {name: jobs[name].result() for name in sorted(jobs)}
+
+
+def apply_keep(found, keep):
+    """--keep-pin: each named repo keeps its current pin instead of the one
+    discover() proposed, or stays out of the workspace if it has none. It
+    works on what discover() found, so it needs no network."""
+    for name in keep:
+        e = found.get(name)
+        if not e or not e.get("head"):
+            continue
+        if "current" in e:
+            e["proposed"] = e.pop("current")
+            e["kept"] = True
+        elif not e.get("was_included"):
+            e["proposed"] = {"rev": e["proposed"].get("rev"),
+                             "error": "its default branch head fails to build in the workspace"}
+    return found
 
 
 # Deciding the workspace -----------------------------------------------
@@ -381,7 +400,7 @@ def problem(info, accepted, toolchain):
     return None
 
 
-def decide(found, previous, cfg, hold_joint=()):
+def decide(found, previous, cfg, hold_joint=None):
     """The new state: the workspace toolchain, and one record per repo."""
     prev = {r["repo"]: r for r in previous.get("repos", [])}
     current_tc = previous.get("toolchain") or (ROOT / "lean-toolchain").read_text().strip()
@@ -418,10 +437,11 @@ def decide(found, previous, cfg, hold_joint=()):
             if key == "current":
                 what = "commit sync.toml holds it at" if e.get("hold") else "head"
                 rec["note"] = f"its {what} cannot join the workspace, because {reasons[0]}"
+            elif e.get("kept"):
+                what = "commit sync.toml holds it at" if e.get("hold") else "head"
+                rec["note"] = f"its {what} fails to build in the workspace"
             elif e.get("hold"):
                 rec["note"] = f"sync.toml holds it: {e['hold'].get('reason', 'no reason given')}"
-            elif info["rev"] != e["head"]:
-                rec["note"] = "its head fails to build in the workspace"
             accepted.append(rec)
             break
         else:
@@ -433,6 +453,11 @@ def decide(found, previous, cfg, hold_joint=()):
             if not rec["license"] and proposed.get("license_file"):
                 rec["license"] = f"see {proposed['license_file']}"
         records[name] = rec
+    if hold_joint is None:
+        # A library held out of AnthologyProofs stays out while its pin
+        # does not move, so an unchanged upstream reproduces the last state.
+        hold_joint = {r["repo"] for r in accepted
+                      if prev.get(r["repo"], {}).get("joint_note") and prev[r["repo"]].get("rev") == r["rev"]}
     for rec in accepted:
         others = {n for o in accepted if o is not rec for n in o["namespaces"]}
         has_proofs = any(lib["kind"] == "proofs" for lib in rec["libs"])
@@ -646,8 +671,10 @@ def render_block(state, audit):
                         f"{'has a proof library' if one else 'have proof libraries'} with unique module "
                         "names that the joint build still fails with, most likely because two packages "
                         "declare the same theorem name.")
-    if any(proof_modules(r) and not r["joint_proofs"] for r in recs):
-        out[-1] += " `scripts/build-all.sh` builds those one package at a time. See issue #4."
+    left_out = [r for r in recs if proof_modules(r) and not r["joint_proofs"]]
+    if left_out:
+        out[-1] += (f" `scripts/build-all.sh` builds {'it on its own' if len(left_out) == 1 else 'those one package at a time'}."
+                    " See issue #4.")
     out += ["", END]
     return "\n".join(out)
 
@@ -726,7 +753,10 @@ def main(argv=None):
     ap.add_argument("--render", action="store_true")
     ap.add_argument("--report")
     ap.add_argument("--keep-pin", nargs="*", default=[])
-    ap.add_argument("--hold-joint", nargs="*", default=[])
+    ap.add_argument("--hold-joint", nargs="*", default=None)
+    found_io = ap.add_mutually_exclusive_group()
+    found_io.add_argument("--save-found")
+    found_io.add_argument("--found")
     ap.add_argument("--previous", default=str(STATE))
     ap.add_argument("--repos-file", default=os.environ.get("SYNC_REPOS_FILE"),
                     help="JSON list of repos to use instead of asking GitHub (or SYNC_REPOS_FILE)")
@@ -738,12 +768,19 @@ def main(argv=None):
         if state is None:
             raise SystemExit("no repos.json to render from")
     else:
-        try:
-            found = discover(cfg, previous, set(args.keep_pin), args.repos_file)
-        except SyncError as e:
-            print(f"sync stopped, nothing written: {e}", file=sys.stderr)
-            return 2
-        state = decide(found, previous, cfg, set(args.hold_joint))
+        if args.found:
+            found = json.loads(Path(args.found).read_text())
+        else:
+            try:
+                found = discover(cfg, previous, args.repos_file)
+            except SyncError as e:
+                print(f"sync stopped, nothing written: {e}", file=sys.stderr)
+                return 2
+            if args.save_found:
+                Path(args.save_found).write_text(json.dumps(found, indent=1) + "\n")
+        found = apply_keep(found, set(args.keep_pin))
+        hold = None if args.hold_joint is None else set(args.hold_joint)
+        state = decide(found, previous, cfg, hold)
     files = rendered(state, load_json(AUDIT, {}), README.read_text())
     changed = [p for p, text in files.items()
                if not (ROOT / p).is_file() or (ROOT / p).read_text() != text]

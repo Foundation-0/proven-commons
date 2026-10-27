@@ -98,7 +98,7 @@ class SyncTest(unittest.TestCase):
     def sync(self, previous=None, keep=(), cfg=None):
         previous = previous or {"toolchain": TC}
         cfg = cfg or self.cfg
-        found = sync.discover(cfg, previous, set(keep), self.up.listing())
+        found = sync.apply_keep(sync.discover(cfg, previous, self.up.listing()), set(keep))
         return sync.decide(found, previous, cfg)
 
     def repo(self, state, name):
@@ -213,7 +213,7 @@ class SyncTest(unittest.TestCase):
         self.up.commit("beta", library("Beta"))
         self.up.commit("gamma", library("Gamma", proofs="Gamma.Proofs", spec="Gamma.Spec"))
         self.up.commit("delta", library("Delta", proofs="Delta.Proofs", spec="Delta.Spec"))
-        found = sync.discover(self.cfg, first, set(), self.up.listing())
+        found = sync.discover(self.cfg, first, self.up.listing())
         held = sync.decide(found, first, self.cfg, hold_joint={"gamma", "delta"})
         gamma = self.repo(held, "gamma")
         self.assertFalse(gamma["joint_proofs"])
@@ -236,6 +236,46 @@ class SyncTest(unittest.TestCase):
         self.assertIn("**alpha**: its proof library leaves `AnthologyProofs`", sync.report(first, joined))
         self.assertIn("its proof library leaves `AnthologyProofs`",
                       sync.report(joined, sync.decide(found, joined, self.cfg, hold_joint={"gamma"})))
+
+    def joint_setup(self):
+        """alpha alone, then gamma and delta join with module names of
+        their own; delta is held out of AnthologyProofs."""
+        self.up.commit("alpha", library("Alpha"))
+        first = self.sync()
+        self.up.commit("gamma", library("Gamma", proofs="Gamma.Proofs", spec="Gamma.Spec"))
+        self.up.commit("delta", library("Delta", proofs="Delta.Proofs", spec="Delta.Spec"))
+        found = sync.discover(self.cfg, first, self.up.listing())
+        return dict(sync.decide(found, first, self.cfg, hold_joint={"delta"}), synced="2000-01-01")
+
+    def test_hold_carries_forward_while_upstream_is_unchanged(self):
+        held = self.joint_setup()
+        again = self.sync(held)
+        self.assertEqual(again, held)
+        self.assertIn("joint_note", self.repo(again, "delta"))
+
+    def test_hold_is_retested_when_its_pin_moves(self):
+        held = self.joint_setup()
+        self.up.commit("delta", {"Delta.lean": "def x := 2\n"})
+        delta = self.repo(self.sync(held), "delta")
+        self.assertTrue(delta["joint_proofs"])
+        self.assertNotIn("joint_note", delta)
+
+    def test_empty_hold_joint_retests_every_hold(self):
+        held = self.joint_setup()
+        found = sync.discover(self.cfg, held, self.up.listing())
+        self.assertTrue(self.repo(sync.decide(found, held, self.cfg, hold_joint=set()), "delta")["joint_proofs"])
+
+    def test_saved_discovery_decides_the_same_without_upstream(self):
+        a1 = self.up.commit("alpha", library("Alpha"))
+        first = self.sync()
+        self.up.commit("alpha", {"Alpha.lean": "def x := 2\n"})
+        saved = json.loads(json.dumps(sync.discover(self.cfg, first, self.up.listing())))
+        live = sync.decide(sync.discover(self.cfg, first, self.up.listing()), first, self.cfg)
+        # Upstream moves again, but decisions from the saved copy do not see it.
+        self.up.commit("alpha", {"Alpha.lean": "def x := 3\n"})
+        self.assertEqual(sync.decide(saved, first, self.cfg), live)
+        kept = sync.decide(sync.apply_keep(json.loads(json.dumps(saved)), {"alpha"}), first, self.cfg)
+        self.assertEqual(self.repo(kept, "alpha")["rev"], a1)
 
     def test_hold_pins_an_older_commit(self):
         a1 = self.up.commit("alpha", library("Alpha"))
