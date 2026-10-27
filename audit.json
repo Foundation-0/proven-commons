@@ -1,0 +1,339 @@
+{
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "packages": {
+    "bencode": {
+      "repo": "bencode",
+      "rev": "de718a10ccbbd837c8b9eda32674254db7cf619a",
+      "declarations": 235,
+      "theorems": 26,
+      "examples": 2,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": {
+        "named": 23,
+        "proved": 23,
+        "missing": [],
+        "unproved": []
+      }
+    },
+    "codec": {
+      "repo": "codec",
+      "rev": "74ae50b94b14dcf2c916865b6e7a95b42fabed9e",
+      "declarations": 943,
+      "theorems": 187,
+      "examples": 19,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": {
+        "named": 37,
+        "proved": 37,
+        "missing": [],
+        "unproved": []
+      }
+    },
+    "csv": {
+      "repo": "csv",
+      "rev": "4ceedb42f999cc35a6a606396d866a3a69961e78",
+      "declarations": 147,
+      "theorems": 13,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "dns": {
+      "repo": "dns",
+      "rev": "a7cad62c0164cd0c1ba5ba4c838e11472741dea1",
+      "declarations": 190,
+      "theorems": 17,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "ip": {
+      "repo": "ip",
+      "rev": "09f2a06fddccb8bdace48de5672eef3e8c2ce4f2",
+      "declarations": 462,
+      "theorems": 82,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "json": {
+      "repo": "json",
+      "rev": "4642e51aa9d3e8f566b06707e7ec3537a799117c",
+      "declarations": 371,
+      "theorems": 41,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "pep440": {
+      "repo": "pep440",
+      "rev": "3ab869050a0625b0cb889c44e0cf215799d67f6c",
+      "declarations": 432,
+      "theorems": 122,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "png": {
+      "repo": "png",
+      "rev": "df3035120ec6a42abb42e75b496e66cb5f2cb5fb",
+      "declarations": 90,
+      "theorems": 12,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "protobuf": {
+      "repo": "protobuf",
+      "rev": "babcab706e425b670da74b3ea0de1e9e4a0e61fb",
+      "declarations": 343,
+      "theorems": 68,
+      "examples": 10,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": {
+        "named": 11,
+        "proved": 11,
+        "missing": [],
+        "unproved": []
+      }
+    },
+    "resp": {
+      "repo": "redis",
+      "rev": "7ff41f249a9236f75911c002e9c1052349781f13",
+      "declarations": 566,
+      "theorems": 65,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "rfc3339": {
+      "repo": "rfc",
+      "rev": "79f30cd0fbbd01ecfcf10bd8c98693fe8daf4238",
+      "declarations": 1402,
+      "theorems": 252,
+      "examples": 18,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": {
+        "named": 32,
+        "proved": 32,
+        "missing": [],
+        "unproved": []
+      }
+    },
+    "semver": {
+      "repo": "semver",
+      "rev": "df74c98d5521710895d90a216fa5cad1c31e44f6",
+      "declarations": 489,
+      "theorems": 110,
+      "examples": 15,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": {
+        "named": 16,
+        "proved": 16,
+        "missing": [],
+        "unproved": []
+      }
+    },
+    "tar-pilot": {
+      "repo": "tar",
+      "rev": "7517a86223e6741b0a6b5c0b3b0fabcf68347bee",
+      "declarations": 89,
+      "theorems": 4,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "toml": {
+      "repo": "toml",
+      "rev": "ca8a615c0492e7717034ef33b602a1bf13fbc298",
+      "declarations": 575,
+      "theorems": 0,
+      "examples": 37,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "utf8": {
+      "repo": "utf",
+      "rev": "276115161f6c33f3b6f80436ebe07474fe5085e9",
+      "declarations": 940,
+      "theorems": 242,
+      "examples": 23,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": {
+        "named": 35,
+        "proved": 35,
+        "missing": [],
+        "unproved": []
+      }
+    },
+    "uuid": {
+      "repo": "uuid",
+      "rev": "b5478df3c95bb4117781cba4ebe908d8cf067062",
+      "declarations": 132,
+      "theorems": 32,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "websocket": {
+      "repo": "websocket",
+      "rev": "b8db7cd364286818d88f5fdb358079943bc4d189",
+      "declarations": 124,
+      "theorems": 15,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    },
+    "zip-pilot": {
+      "repo": "zip",
+      "rev": "2cf824fde49fb336c217c89190891ddb753cfe10",
+      "declarations": 110,
+      "theorems": 4,
+      "examples": 0,
+      "sorry_in_build": [],
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "sorry": [],
+      "nonstandard": {},
+      "package_axioms": [],
+      "spec": null
+    }
+  }
+}
