@@ -19,6 +19,7 @@ out=${1:?usage: scripts/sync-build.sh OUT_DIR}
 mkdir -p "$out"
 tmp=$(mktemp -d)
 FILES="repos.json lakefile.toml lean-toolchain Anthology.lean AnthologyProofs.lean README.md lake-manifest.json audit.json"
+kept=""
 cp repos.json "$tmp/previous.json"
 cp audit.json "$tmp/previous-audit.json"
 
@@ -54,8 +55,42 @@ if [ -s "$tmp/failed" ]; then
   echo "- These repos failed to build at their new head, so each keeps its current pin, or stays out of the workspace if it is new: $kept." >> "$tmp/results.md"
 fi
 result "\`scripts/build-all.sh\`, every package and library on its own" $status
-lake build Anthology AnthologyProofs
-result "\`lake build Anthology AnthologyProofs\`" $?
+lake build Anthology
+result "\`lake build Anthology\`" $?
+lake build AnthologyProofs
+joint=$?
+if [ "$joint" -ne 0 ]; then
+  # Unique module names do not rule out two packages declaring the same
+  # theorem name. Start AnthologyProofs empty, add the candidate proof
+  # libraries back one at a time, those it imported before first, and
+  # keep each one the joint build still accepts.
+  candidates=$(python3 - "$tmp/previous.json" <<'PY'
+import json, sys
+before = {r["repo"] for r in json.load(open(sys.argv[1])).get("repos", []) if r.get("joint_proofs")}
+now = [r["repo"] for r in json.load(open("repos.json"))["repos"] if r.get("joint_proofs")]
+print(" ".join(sorted(now, key=lambda r: (r not in before, r))))
+PY
+)
+  if [ -n "$candidates" ]; then
+    held="$candidates"
+    for c in $candidates; do
+      # shellcheck disable=SC2086
+      trial=$(printf '%s\n' $held | grep -vx "$c" | tr '\n' ' ')
+      # shellcheck disable=SC2086
+      python3 scripts/sync.py --previous "$tmp/previous.json" --keep-pin $kept --hold-joint $trial > /dev/null || exit 1
+      if lake build AnthologyProofs > /dev/null 2>&1; then held="$trial"; fi
+    done
+    held=$(printf '%s' "$held" | sed 's/ *$//')
+    # shellcheck disable=SC2086
+    python3 scripts/sync.py --previous "$tmp/previous.json" --report "$tmp/changes.md" --keep-pin $kept --hold-joint $held || exit 1
+    lake build AnthologyProofs
+    joint=$?
+    if [ -n "$held" ]; then
+      echo "- \`AnthologyProofs\` fails to build with the proof libraries of $held, so they stay out of it: most likely they declare a theorem name another package also declares." >> "$tmp/results.md"
+    fi
+  fi
+fi
+result "\`lake build AnthologyProofs\`" $joint
 python3 scripts/audit.py
 result "\`scripts/audit.py\`, the proof audit" $?
 python3 scripts/sync.py --render > /dev/null

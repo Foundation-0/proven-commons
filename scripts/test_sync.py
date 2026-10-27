@@ -205,6 +205,38 @@ class SyncTest(unittest.TestCase):
         self.assertIn("import Gamma.Proofs  -- gamma", proofs)
         self.assertIn("-- alpha, beta.", proofs)
 
+    def test_hold_joint_keeps_new_proof_libraries_out(self):
+        self.up.commit("alpha", library("Alpha"))
+        first = self.sync()
+        # beta's plain Proofs and Spec collide with alpha's; gamma's and
+        # delta's module names are their own.
+        self.up.commit("beta", library("Beta"))
+        self.up.commit("gamma", library("Gamma", proofs="Gamma.Proofs", spec="Gamma.Spec"))
+        self.up.commit("delta", library("Delta", proofs="Delta.Proofs", spec="Delta.Spec"))
+        found = sync.discover(self.cfg, first, set(), self.up.listing())
+        held = sync.decide(found, first, self.cfg, hold_joint={"gamma", "delta"})
+        gamma = self.repo(held, "gamma")
+        self.assertFalse(gamma["joint_proofs"])
+        self.assertIn("joint proof build fails", gamma["joint_note"])
+        proofs = sync.render_proofs(held)
+        self.assertNotIn("import Gamma.Proofs", proofs)
+        self.assertIn("the joint build fails with them", proofs)
+        self.assertIn("-- delta, gamma.", proofs)
+        self.assertIn("-- alpha, beta.", proofs)
+        self.assertIn("stays out of `AnthologyProofs`", sync.report(first, held))
+        # Only the named repos are held. alpha's proof library collides
+        # with beta's, so it is not joint, and holding it changes nothing.
+        partial = sync.decide(found, first, self.cfg, hold_joint={"delta", "alpha"})
+        self.assertTrue(self.repo(partial, "gamma")["joint_proofs"])
+        self.assertFalse(self.repo(partial, "delta")["joint_proofs"])
+        self.assertNotIn("joint_note", self.repo(partial, "alpha"))
+        joined = sync.decide(found, first, self.cfg)
+        self.assertIn("**gamma**: its proof library joins `AnthologyProofs`", sync.report(first, joined))
+        # alpha was joint while it was alone.
+        self.assertIn("**alpha**: its proof library leaves `AnthologyProofs`", sync.report(first, joined))
+        self.assertIn("its proof library leaves `AnthologyProofs`",
+                      sync.report(joined, sync.decide(found, joined, self.cfg, hold_joint={"gamma"})))
+
     def test_hold_pins_an_older_commit(self):
         a1 = self.up.commit("alpha", library("Alpha"))
         self.up.commit("alpha", {"Alpha.lean": "def x := 2\n"})

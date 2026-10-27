@@ -112,7 +112,7 @@ Not in the workspace yet:
 | [messagepack](https://github.com/Proven-Commons/messagepack) | Lean MessagePack decoder | No lakefile on its default branch | none |
 | [punycode](https://github.com/Proven-Commons/punycode) | Lean punycode | No lakefile on its default branch | none |
 
-Joint proof build: `AnthologyProofs` imports the proof libraries of 0 packages. 14 packages (bencode, codec, csv, dns, ip, json, pep440, png, protobuf, rfc, semver, toml, utf, uuid) have proof libraries whose top-level module names are also used by other packages, so `scripts/build-all.sh` builds them one package at a time. See issue #4.
+Joint proof build: `AnthologyProofs` imports the proof libraries of 0 packages. 14 packages (bencode, codec, csv, dns, ip, json, pep440, png, protobuf, rfc, semver, toml, utf, uuid) have proof libraries whose top-level module names are also used by other packages. `scripts/build-all.sh` builds those one package at a time. See issue #4.
 
 <!-- END GENERATED: libraries -->
 
@@ -145,8 +145,11 @@ When anything changes, the workflow updates `repos.json`, `lakefile.toml`,
 table and `lake-manifest.json`. It then builds everything, runs the proof
 audit, and opens a pull request, or updates the open one, on the branch
 `sync/upstream`. If a package's new head fails to build, it keeps that
-package at its current pin and says so in the pull request. The pull
-request lists each pin move with a link to the upstream diff.
+package at its current pin and says so in the pull request. If
+`AnthologyProofs` fails to build with a proof library that has just
+become eligible, which happens when two packages declare the same
+theorem name, it keeps that library out and says so. The pull request
+lists each pin move with a link to the upstream diff.
 
 A pin update changes what this repo certifies, so a sync pull request is
 not a routine bump. It merges like any other, under the org's merge SOP:
@@ -188,8 +191,8 @@ week:
   the same pins as `lakefile.toml`. It also runs the sync's unit tests.
   It needs no network and no Lean toolchain.
 - `lake build Anthology AnthologyProofs` builds each package's main
-  library, and each proof library whose module names are unique in the
-  workspace.
+  library, and each proof library whose module and theorem names are
+  unique in the workspace.
 - `scripts/build-all.sh` builds each package on its own: its upstream
   default targets, then each of its libraries, so every `Proofs` and
   `Spec` library is compiled even when upstream default targets leave

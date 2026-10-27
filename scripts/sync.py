@@ -3,7 +3,7 @@
 
 Run from the repo root:
 
-    python3 scripts/sync.py [--check] [--report FILE] [--keep-pin REPO ...]
+    python3 scripts/sync.py [--check] [--report FILE] [--keep-pin REPO ...] [--hold-joint REPO ...]
     python3 scripts/sync.py --render
 
 The default run lists every public repo in the org, fetches the head of
@@ -18,8 +18,11 @@ regenerate lake-manifest.json, build, and run scripts/audit.py.
 audit.json. --report writes a Markdown summary of the changes, for a
 pull request. --keep-pin names repos whose default branch head fails to
 build: each keeps its current pin, or stays out of the workspace if it has
-none. --previous names the repos.json to compare with (default: the one
-in the repo).
+none. --hold-joint names repos whose proof library AnthologyProofs
+leaves out because the joint proof build fails with it: two packages can
+declare the same theorem name even when their module names differ.
+--previous names the repos.json to compare with (default: the one in the
+repo).
 
 A repo joins the workspace when its default branch has a lakefile.toml
 and a lean-toolchain, it uses the workspace toolchain, and every
@@ -378,7 +381,7 @@ def problem(info, accepted, toolchain):
     return None
 
 
-def decide(found, previous, cfg):
+def decide(found, previous, cfg, hold_joint=()):
     """The new state: the workspace toolchain, and one record per repo."""
     prev = {r["repo"]: r for r in previous.get("repos", [])}
     current_tc = previous.get("toolchain") or (ROOT / "lean-toolchain").read_text().strip()
@@ -434,6 +437,9 @@ def decide(found, previous, cfg):
         others = {n for o in accepted if o is not rec for n in o["namespaces"]}
         has_proofs = any(lib["kind"] == "proofs" for lib in rec["libs"])
         rec["joint_proofs"] = has_proofs and not (set(rec["proof_namespaces"]) & others)
+        if rec["joint_proofs"] and rec["repo"] in hold_joint:
+            rec["joint_proofs"] = False
+            rec["joint_note"] = "the joint proof build fails with it"
     state = {
         "org": cfg["org"],
         "toolchain": toolchain,
@@ -507,18 +513,28 @@ def render_proofs(state):
         "-- Aggregator module for the proof libraries of the anthology.",
         f"-- {GENERATED}",
         "-- A package's proof library is imported here once every top-level",
-        "-- module name it uses is unique in the workspace. Until then,",
-        "-- scripts/build-all.sh builds it one package at a time. Upstream",
-        "-- proof libraries named plain `Proofs` and `Spec` collide across",
-        "-- packages: see issue #4.",
+        "-- module name it uses is unique in the workspace, and the joint",
+        "-- build succeeds with it. Until then, scripts/build-all.sh builds it",
+        "-- one package at a time. Upstream proof libraries named plain",
+        "-- `Proofs` and `Spec` collide across packages, and several declare",
+        "-- the same `Spec.*` theorem names: see issue #4.",
     ]
     recs = included(state)
     pairs = [(m, rec["repo"]) for rec in recs if rec["joint_proofs"] for m in proof_modules(rec)]
-    waiting = [rec["repo"] for rec in recs if proof_modules(rec) and not rec["joint_proofs"]]
-    if waiting:
-        head += ["--", "-- Not imported yet, because their module names collide:"]
-        head += wrap([w + "," for w in waiting[:-1]] + [waiting[-1] + "."])
+    for title, repos in outside(recs):
+        head += ["--", f"-- Not imported yet, because {title}:"]
+        head += wrap([w + "," for w in repos[:-1]] + [repos[-1] + "."])
     return "\n".join(head + render_imports(pairs)) + "\n"
+
+
+def outside(recs):
+    """The packages whose proof library AnthologyProofs leaves out, by
+    reason: (reason, repos) for each reason that has any."""
+    collide = [r["repo"] for r in recs if proof_modules(r) and not r["joint_proofs"] and not r.get("joint_note")]
+    held = [r["repo"] for r in recs if r.get("joint_note")]
+    return [(why, repos) for why, repos in (
+        ("their module names collide", collide),
+        ("the joint build fails with them, though their module names are unique", held)) if repos]
 
 
 def audit_cell(rec, audit):
@@ -617,14 +633,21 @@ def render_block(state, audit):
             out.append(f"| {repo_cell(rec)} | {describe(rec)} | {rec['reason'][:1].upper()}{rec['reason'][1:]} "
                        f"| {rec.get('license') or 'none'} |")
     joint = [r["repo"] for r in recs if r["joint_proofs"]]
-    waiting = [r["repo"] for r in recs if proof_modules(r) and not r["joint_proofs"]]
     out += ["", f"Joint proof build: `AnthologyProofs` imports the proof libraries of "
             f"{count(len(joint), 'package')}" + (f" ({', '.join(joint)})" if joint else "") + "."]
-    if waiting:
-        out[-1] += (f" {count(len(waiting), 'package')} ({', '.join(waiting)}) "
-                    f"{'has a proof library whose' if len(waiting) == 1 else 'have proof libraries whose'} "
-                    "top-level module names are also used by other packages, so "
-                    "`scripts/build-all.sh` builds them one package at a time. See issue #4.")
+    for why, repos in outside(recs):
+        one = len(repos) == 1
+        if why.startswith("their module"):
+            out[-1] += (f" {count(len(repos), 'package')} ({', '.join(repos)}) "
+                        f"{'has a proof library whose' if one else 'have proof libraries whose'} "
+                        "top-level module names are also used by other packages.")
+        else:
+            out[-1] += (f" {count(len(repos), 'package')} ({', '.join(repos)}) "
+                        f"{'has a proof library' if one else 'have proof libraries'} with unique module "
+                        "names that the joint build still fails with, most likely because two packages "
+                        "declare the same theorem name.")
+    if any(proof_modules(r) and not r["joint_proofs"] for r in recs):
+        out[-1] += " `scripts/build-all.sh` builds those one package at a time. See issue #4."
     out += ["", END]
     return "\n".join(out)
 
@@ -678,6 +701,14 @@ def report(old, new, excluded=()):
             if a.get("note") and a.get("note") != (b or {}).get("note"):
                 where = f"stays at `{a['rev'][:12]}`" if a["rev"] != a["head"] else "follows its head"
                 lines.append(f"- **{name}** {where}: {a['note']}.")
+            was_joint = (b or {}).get("joint_proofs")
+            because = f", because {a['joint_note']}" if a.get("joint_note") else ""
+            if a.get("joint_proofs") and not was_joint:
+                lines.append(f"- **{name}**: its proof library joins `AnthologyProofs`.")
+            elif was_joint and not a.get("joint_proofs"):
+                lines.append(f"- **{name}**: its proof library leaves `AnthologyProofs`{because}.")
+            elif because and a.get("joint_note") != (b or {}).get("joint_note"):
+                lines.append(f"- **{name}**: its proof library stays out of `AnthologyProofs`{because}.")
         elif b and b["state"] == "included":
             lines.append(f"- **{name}** leaves the workspace: {a['reason']}.")
         elif not b:
@@ -695,6 +726,7 @@ def main(argv=None):
     ap.add_argument("--render", action="store_true")
     ap.add_argument("--report")
     ap.add_argument("--keep-pin", nargs="*", default=[])
+    ap.add_argument("--hold-joint", nargs="*", default=[])
     ap.add_argument("--previous", default=str(STATE))
     ap.add_argument("--repos-file", default=os.environ.get("SYNC_REPOS_FILE"),
                     help="JSON list of repos to use instead of asking GitHub (or SYNC_REPOS_FILE)")
@@ -711,7 +743,7 @@ def main(argv=None):
         except SyncError as e:
             print(f"sync stopped, nothing written: {e}", file=sys.stderr)
             return 2
-        state = decide(found, previous, cfg)
+        state = decide(found, previous, cfg, set(args.hold_joint))
     files = rendered(state, load_json(AUDIT, {}), README.read_text())
     changed = [p for p, text in files.items()
                if not (ROOT / p).is_file() or (ROOT / p).read_text() != text]

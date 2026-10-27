@@ -34,7 +34,8 @@ failed=""
 failed_repos=""
 while read -r name repo libs; do
   echo "Building $name"
-  (cd ".lake/packages/$name" && lake build) || { failed="$failed $name"; failed_repos="$failed_repos $repo"; }
+  # --allow-empty: a package with no default targets is not a failure.
+  (cd ".lake/packages/$name" && lake build --allow-empty) || { failed="$failed $name"; failed_repos="$failed_repos $repo"; }
   echo "Building $name libraries: $libs"
   # $libs is unquoted on purpose: one argument per library.
   # shellcheck disable=SC2086
