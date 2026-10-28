@@ -1,0 +1,30 @@
+# Read by scripts/sync.py. See "How it stays up to date" in README.md.
+
+# The GitHub org whose Lean library repos this anthology collects.
+org = "Proven-Commons"
+
+# Repos in the org that are not Lean libraries. The sync never pins them
+# and does not list them as pending. Every other public repo in the org is
+# treated as a library repo: pinned once its default branch can join the
+# workspace, and listed as not yet in the workspace, with the reason,
+# until then.
+exclude = [
+  ".github", # the org profile
+  "mission", # the org's structure, candidate lists and verified bar
+  "site",    # an alternative build of the org website
+]
+
+# Optional. Forces the workspace toolchain. Without it, the sync uses the
+# toolchain most library repos use on their default branch, and keeps the
+# current one on a tie.
+# toolchain = "leanprover/lean4:v4.35.0"
+
+# Optional. Pins a repo at a given commit of its default branch instead of
+# the branch head, for example while a change on upstream main that breaks
+# the workspace is sorted out. Never pin a commit that is not on the
+# default branch: pins track merged work only. Remove the entry to go back
+# to tracking the default branch.
+#
+# [hold.ip]
+# rev = "09f2a06fddccb8bdace48de5672eef3e8c2ce4f2"
+# reason = "main at 1234abcd fails to build; see Proven-Commons/ip#12"

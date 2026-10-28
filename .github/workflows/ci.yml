@@ -4,8 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The sync workflow starts this on its branch, because GitHub does not
+  # start CI for a pull request that a workflow's own token opens.
   workflow_dispatch:
-  # Weekly, to report pins that have fallen behind upstream main.
+  # Weekly, so a break in the toolchain install or the runner shows up
+  # even in a week with no change here. Upstream changes reach this repo
+  # through the sync workflow instead.
   schedule:
     - cron: "17 6 * * 1"
 
@@ -19,14 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/check-consistency.py
-
-  pin-freshness:
-    name: Pins match upstream main
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: python3 scripts/update-pins.py --check
+      - name: Sync unit tests
+        run: python3 -m unittest discover -s scripts -v
 
   build:
     name: Build
@@ -36,16 +34,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install elan
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-            | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+        run: sh scripts/setup-lean.sh
       - uses: actions/cache@v4
         with:
           path: .lake
           key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
       # Lake fetches the packages at the revs in the committed manifest.
       - name: Joint build
-        run: lake build Anthology
-      - name: Per-package build, including Proofs libraries
+        run: lake build Anthology AnthologyProofs
+      - name: Per-package build, including every Spec and Proofs library
         run: scripts/build-all.sh
+      - name: Proof audit matches audit.json
+        run: python3 scripts/audit.py --check

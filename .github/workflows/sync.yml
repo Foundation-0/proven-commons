@@ -1,0 +1,86 @@
+name: Sync with upstream
+
+# Keeps the anthology in step with the Proven-Commons org: new repos, new
+# commits on each repo's default branch, and toolchain moves. Opens or
+# updates one pull request on the branch sync/upstream. See "How it stays
+# up to date" in README.md.
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+  # Lets an upstream repo start a sync when its main branch moves, with a
+  # token that may dispatch to this repo:
+  #   gh api repos/Foundation-0/proven-commons/dispatches -f event_type=upstream-changed
+  repository_dispatch:
+    types: [upstream-changed]
+  # Applies a change to the sync's own configuration as soon as it merges.
+  push:
+    branches: [main]
+    paths: [sync.toml, scripts/sync.py, scripts/audit.py, scripts/sync-build.sh]
+
+concurrency:
+  group: sync
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    name: Sync and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    # This job fetches and builds upstream code, so it can read only.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install elan
+        run: sh scripts/setup-lean.sh
+      - uses: actions/cache@v4
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-sync-${{ github.run_id }}
+          restore-keys: lake-${{ runner.os }}-
+      - name: Sync, build and audit
+        env:
+          # Read-only here: lists the org's public repos.
+          GITHUB_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: scripts/sync-build.sh "$RUNNER_TEMP/sync"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sync
+          path: ${{ runner.temp }}/sync
+          retention-days: 7
+
+  pull-request:
+    name: Open or update the pull request
+    needs: update
+    runs-on: ubuntu-latest
+    # This job can write, so it runs nothing from upstream: it copies the
+    # generated files from the artifact and opens the pull request.
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: sync
+          path: ${{ runner.temp }}/sync
+      - name: Open, update or close the pull request
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
+          HAS_SYNC_TOKEN: ${{ secrets.SYNC_TOKEN != '' }}
+        run: |
+          # GitHub starts CI by itself only for a token other than this
+          # workflow's own.
+          if [ "$HAS_SYNC_TOKEN" = "true" ]; then export DISPATCH_CI=false; else export DISPATCH_CI=true; fi
+          scripts/sync-pr.sh "$RUNNER_TEMP/sync"
