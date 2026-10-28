@@ -4,6 +4,8 @@ builds small upstream repos in a temporary folder and syncs against them.
 
 Run from the repo root:  python3 -m unittest discover -s scripts -v
 """
+import contextlib
+import io
 import json
 import os
 import subprocess
@@ -314,6 +316,20 @@ class SyncTest(unittest.TestCase):
         with self.assertRaises(sync.SyncError):
             self.sync()
 
+    def test_cli_names_the_repo_it_cannot_read_and_writes_nothing(self):
+        self.up.commit("alpha", library("Alpha"))
+        self.up.meta["ghost"] = {"name": "ghost", "description": "", "default_branch": "main",
+                                 "archived": False, "license": None}
+        files = ("repos.json", "lakefile.toml", "Anthology.lean", "README.md")
+        before = {f: (sync.ROOT / f).read_text() for f in files}
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+            status = sync.main(["--repos-file", self.up.listing()])
+        self.assertEqual(status, 2)
+        self.assertIn("Failed to fetch the main head for repository 'ghost':", err.getvalue())
+        self.assertIn("nothing written", err.getvalue())
+        self.assertEqual({f: (sync.ROOT / f).read_text() for f in files}, before)
+
     def test_repo_removed_from_the_org_leaves(self):
         self.up.commit("alpha", library("Alpha"))
         self.up.commit("beta", library("Beta"))
@@ -358,6 +374,24 @@ class ParseTest(unittest.TestCase):
                         "leanprover/lean4:v4.9.0"], key=sync.version)
         self.assertEqual(order, ["leanprover/lean4:v4.9.0", "leanprover/lean4:v4.36.0-rc1",
                                  "leanprover/lean4:v4.36.0"])
+
+    def test_anthology_notes_a_repo_with_more_than_one_module(self):
+        def rec(repo, *mains):
+            return {"repo": repo, "state": "included",
+                    "libs": [{"name": m, "kind": "main", "roots": [m]} for m in mains]
+                    + [{"name": "Proofs", "kind": "proofs", "roots": ["Proofs"]}]}
+        text = sync.render_anthology({"repos": [rec("ip", "Ip"), rec("utf", "Utf8", "Utf16")]})
+        self.assertIn("-- workspace: 3 imports for 2 packages.", text)
+        self.assertIn("-- utf provides both Utf8 and Utf16.\nimport Utf8   -- utf\nimport Utf16  -- utf\n", text)
+        self.assertIn("import Ip     -- ip\n", text)
+        three = sync.render_anthology({"repos": [rec("x", "A", "B", "C")]})
+        self.assertIn("-- x provides A, B and C.", three)
+
+    def test_git_failure_reason(self):
+        e = subprocess.CalledProcessError(128, ["git"], output="", stderr="fatal: not found\n")
+        self.assertEqual(sync.git_failure(e), "fatal: not found")
+        self.assertEqual(sync.git_failure(subprocess.CalledProcessError(2, ["git"])), "git exited with status 2")
+        self.assertEqual(sync.git_failure(subprocess.TimeoutExpired(["git"], 60)), "timed out after 60s")
 
     def test_readme_needs_markers(self):
         with self.assertRaises(SystemExit):

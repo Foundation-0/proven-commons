@@ -38,7 +38,9 @@ current pin, with the reason. README.md, "How it stays up to date", has
 the full rules.
 
 Needs Python 3.11 or later, git, and nothing outside the standard
-library. Reads GITHUB_TOKEN, if set, to list the org's repos.
+library. Reads GITHUB_TOKEN, if set, to list the org's repos. If a repo
+cannot be read, it exits 2, names the repo and git's reason, and writes
+nothing.
 """
 import argparse
 import datetime
@@ -120,6 +122,13 @@ def license_id(repo):
 class SyncError(Exception):
     """Upstream could not be read. The sync stops rather than write a
     state that a network failure has shaped."""
+
+
+def git_failure(e):
+    """Why a git command failed: its output, else its exit status."""
+    if isinstance(e, subprocess.TimeoutExpired):
+        return f"timed out after {int(e.timeout)}s"
+    return ((e.stderr or "") + (e.stdout or "")).strip() or f"git exited with status {e.returncode}"
 
 
 def git(*args, cwd=None, tries=1):
@@ -302,7 +311,8 @@ def discover_one(meta, cfg, old, tmp):
     try:
         out = git("ls-remote", url, f"refs/heads/{meta['default_branch']}", tries=3)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-        raise SyncError(f"{name}: cannot list {url}: {getattr(e, 'stderr', '') or e}") from e
+        raise SyncError(f"Failed to fetch the {meta['default_branch']} head for repository "
+                        f"'{name}': {git_failure(e)}") from e
     if not out:
         entry["head"] = None
         entry["proposed"] = {"error": "its default branch has no commits yet"}
@@ -323,7 +333,7 @@ def discover_one(meta, cfg, old, tmp):
             got = fetch(url, rev, dest)
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             if key == "proposed":
-                raise SyncError(f"{name}: cannot fetch {rev}: {getattr(e, 'stderr', '') or e}") from e
+                raise SyncError(f"Failed to fetch commit {rev} of repository '{name}': {git_failure(e)}") from e
             # The current pin may have been force-pushed away upstream.
             entry[key] = {"rev": rev, "error": f"its current pin {rev[:12]} can no longer be fetched"}
             continue
@@ -515,22 +525,30 @@ def render_lakefile(state):
     return "\n".join(out) + "\n"
 
 
-def render_imports(pairs):
-    width = max((len(m) for m, _ in pairs), default=0)
+def render_imports(pairs, width=None):
+    width = width or max((len(m) for m, _ in pairs), default=0)
     return [f"import {m.ljust(width)}  -- {repo}" for m, repo in pairs]
 
 
 def render_anthology(state):
+    recs = included(state)
+    pairs = [(m, rec["repo"]) for rec in recs for m in main_modules(rec)]
     head = [
         "-- Aggregator module for the Proven-Commons anthology.",
         f"-- {GENERATED}",
         "-- Building this module builds the main library of every package in the",
-        "-- workspace. Each import is a main library module of the upstream repo",
-        "-- in its comment. One repo can provide more than one, as utf provides",
-        "-- Utf8 and Utf16.",
+        f"-- workspace: {count(len(pairs), 'import')} for {count(len(recs), 'package')}. Each import is a main",
+        "-- library module of the upstream repo in its comment.",
     ]
-    pairs = [(m, rec["repo"]) for rec in included(state) for m in main_modules(rec)]
-    return "\n".join(head + render_imports(pairs)) + "\n"
+    width = max((len(m) for m, _ in pairs), default=0)
+    body = []
+    for rec in recs:
+        mods = main_modules(rec)
+        if len(mods) > 1:
+            listed = " and ".join(mods) if len(mods) == 2 else ", ".join(mods[:-1]) + f" and {mods[-1]}"
+            body.append(f"-- {rec['repo']} provides {'both ' if len(mods) == 2 else ''}{listed}.")
+        body += render_imports([(m, rec["repo"]) for m in mods], width)
+    return "\n".join(head + body) + "\n"
 
 
 def render_proofs(state):
