@@ -8,11 +8,13 @@ import contextlib
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sync  # noqa: E402
@@ -316,19 +318,78 @@ class SyncTest(unittest.TestCase):
         with self.assertRaises(sync.SyncError):
             self.sync()
 
+    def run_cli(self, *argv):
+        """sync.main against a copy of the repo's files, so that no run, even a
+        broken one, can write to the checkout. Returns (status, stderr, the
+        copy's files before, after)."""
+        root = Path(self.tmp.name) / "root"
+        root.mkdir()
+        for f in ("repos.json", "audit.json", "README.md", "lean-toolchain"):
+            shutil.copy(sync.ROOT / f, root / f)
+        (root / "sync.toml").write_text('org = "Org"\nexclude = []\n')
+        files = lambda: {p.name: p.read_text() for p in sorted(root.iterdir())}
+        before = files()
+        err = io.StringIO()
+        patches = [mock.patch.object(sync, k, root / v) for k, v in (
+            ("ROOT", "."), ("CONFIG", "sync.toml"), ("STATE", "repos.json"),
+            ("AUDIT", "audit.json"), ("README", "README.md"))]
+        with contextlib.ExitStack() as stack:
+            for patch in patches:
+                stack.enter_context(patch)
+            stack.enter_context(contextlib.redirect_stderr(err))
+            stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            status = sync.main([*argv, "--previous", str(root / "repos.json")])
+        return status, err.getvalue(), before, files()
+
     def test_cli_names_the_repo_it_cannot_read_and_writes_nothing(self):
         self.up.commit("alpha", library("Alpha"))
         self.up.meta["ghost"] = {"name": "ghost", "description": "", "default_branch": "main",
                                  "archived": False, "license": None}
-        files = ("repos.json", "lakefile.toml", "Anthology.lean", "README.md")
-        before = {f: (sync.ROOT / f).read_text() for f in files}
-        err = io.StringIO()
-        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
-            status = sync.main(["--repos-file", self.up.listing()])
+        status, err, before, after = self.run_cli("--repos-file", self.up.listing())
         self.assertEqual(status, 2)
-        self.assertIn("Failed to fetch the main head for repository 'ghost':", err.getvalue())
-        self.assertIn("nothing written", err.getvalue())
-        self.assertEqual({f: (sync.ROOT / f).read_text() for f in files}, before)
+        self.assertIn("Failed to fetch the main head for repository 'ghost':", err)
+        self.assertIn("nothing written", err)
+        self.assertEqual(after, before)
+
+    def test_pinned_repo_whose_branch_comes_back_empty_stops_the_sync(self):
+        self.up.commit("alpha", library("Alpha"))
+        first = self.sync()
+        run("git", "update-ref", "-d", "refs/heads/main", cwd=self.up.base / "alpha")
+        with self.assertRaisesRegex(sync.SyncError, "repository 'alpha': empty response from ls-remote"):
+            self.sync(first)
+
+    def test_current_pin_gone_upstream_is_recorded(self):
+        self.up.commit("alpha", library("Alpha"))
+        first = self.sync()
+        # Force-push main to an unrelated history, and drop the old commits.
+        path = self.up.base / "alpha"
+        run("git", "checkout", "-q", "--orphan", "new", cwd=path)
+        run("git", "rm", "-q", "-rf", ".", cwd=path)
+        self.up.commit("alpha", {"README.md": "moved\n"})
+        run("git", "branch", "-q", "-M", "new", "main", cwd=path)
+        run("git", "reflog", "expire", "--expire=now", "--all", cwd=path)
+        run("git", "gc", "-q", "--prune=now", cwd=path)
+        # The new head cannot join, and the old pin is gone, so alpha leaves
+        # with the head's reason; nothing stops the sync.
+        found = sync.discover(self.cfg, first, self.up.listing())
+        self.assertIn("is no longer on GitHub", found["alpha"]["current"]["error"])
+        alpha = self.repo(sync.decide(found, first, self.cfg), "alpha")
+        self.assertEqual(alpha["state"], "pending")
+        self.assertIn("no lakefile", alpha["reason"])
+
+    def test_current_pin_unreachable_for_another_reason_stops_the_sync(self):
+        self.up.commit("alpha", library("Alpha"))
+        first = self.sync()
+        self.up.commit("alpha", {"Alpha.lean": "def x := 2\n"})
+        real_fetch, current = sync.fetch, first["repos"][0]["rev"]
+
+        def flaky(url, ref, dest):
+            if ref == current:
+                raise subprocess.CalledProcessError(128, ["git"], stderr="fatal: Could not resolve host: github.com")
+            return real_fetch(url, ref, dest)
+        with mock.patch.object(sync, "fetch", flaky), \
+                self.assertRaisesRegex(sync.SyncError, "repository 'alpha': fatal: Could not resolve host"):
+            self.sync(first)
 
     def test_repo_removed_from_the_org_leaves(self):
         self.up.commit("alpha", library("Alpha"))

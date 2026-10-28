@@ -124,6 +124,11 @@ class SyncError(Exception):
     state that a network failure has shaped."""
 
 
+# What git prints when it reaches the repo but the commit is not there,
+# for example after a force-push: on GitHub and locally alike.
+COMMIT_GONE = re.compile(r"not our ref|couldn't find remote ref|unadvertised object")
+
+
 def git_failure(e):
     """Why a git command failed: its output, else its exit status."""
     if isinstance(e, subprocess.TimeoutExpired):
@@ -314,6 +319,11 @@ def discover_one(meta, cfg, old, tmp):
         raise SyncError(f"Failed to fetch the {meta['default_branch']} head for repository "
                         f"'{name}': {git_failure(e)}") from e
     if not out:
+        if old.get("state") == "included":
+            # A pinned repo cannot have lost its branch for a good reason
+            # the sync should act on; stop, as for any read failure.
+            raise SyncError(f"Failed to fetch the {meta['default_branch']} head for repository "
+                            f"'{name}': empty response from ls-remote")
         entry["head"] = None
         entry["proposed"] = {"error": "its default branch has no commits yet"}
         return entry
@@ -332,10 +342,11 @@ def discover_one(meta, cfg, old, tmp):
         try:
             got = fetch(url, rev, dest)
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            if key == "proposed":
-                raise SyncError(f"Failed to fetch commit {rev} of repository '{name}': {git_failure(e)}") from e
-            # The current pin may have been force-pushed away upstream.
-            entry[key] = {"rev": rev, "error": f"its current pin {rev[:12]} can no longer be fetched"}
+            reason = git_failure(e)
+            if key == "proposed" or not COMMIT_GONE.search(reason):
+                raise SyncError(f"Failed to fetch commit {rev} of repository '{name}': {reason}") from e
+            # The current pin is gone upstream, for example force-pushed away.
+            entry[key] = {"rev": rev, "error": f"its current pin {rev[:12]} is no longer on GitHub"}
             continue
         entry[key] = dict(inspect(dest), rev=got)
     return entry
