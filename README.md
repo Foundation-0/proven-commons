@@ -229,3 +229,11 @@ records.
 This repo's own files are under the Apache License 2.0, in `LICENSE`.
 The libraries it pins are not part of this repo, and each carries the
 license of its upstream repo, as the table's "License" column records.
+
+## Joint-proof integration still pending
+
+The [joint-proof acceptance workflow](notes/joint-proof-acceptance.md) lists
+how to inventory proof libraries still outside the aggregator and verify
+upstream integration. `python3 scripts/joint-proof-status.py` reports the
+recorded pins and admission state. It does not run Lean or establish that
+upstream renames have landed.
