@@ -12,7 +12,8 @@
 #
 # OUT_DIR gets the generated files, pr-body.md and commit-message.txt.
 # A failing build does not stop the script: the pull request reports it,
-# and its CI fails. A sync that cannot read upstream exits 1.
+# and its CI fails. A sync that cannot read upstream, or cannot fetch the
+# toolchain and every pinned package after three tries, exits 1.
 set -u
 cd "$(dirname "$0")/.." || exit 1
 out=${1:?usage: scripts/sync-build.sh OUT_DIR}
@@ -45,6 +46,35 @@ decide() {
 decide --hold-joint > /dev/null || exit 1
 
 result() { if [ "$2" -eq 0 ]; then echo "- $1: passed" >> "$tmp/results.md"; else echo "- $1: **failed**" >> "$tmp/results.md"; fi; }
+
+# The packages repos.json pins that are not checked out at their pin.
+unfetched() {
+  python3 - <<'PY'
+import json, subprocess
+for r in json.load(open("repos.json"))["repos"]:
+    if r["state"] != "included":
+        continue
+    head = subprocess.run(["git", "-C", f".lake/packages/{r['package']}", "rev-parse", "HEAD"],
+                          capture_output=True, text=True).stdout.strip()
+    if head != r["rev"]:
+        print(r["package"])
+PY
+}
+# Fetch the toolchain and every pinned package. A failure here is the
+# network or the toolchain download, and says nothing about upstream
+# code, so retry, and if it still fails, stop the run with no pull
+# request rather than let the build blame upstream heads for it.
+update_workspace() {
+  for attempt in 1 2 3; do
+    lake update
+    missing=$(unfetched)
+    [ -z "$missing" ] && return 0
+    echo "lake update left these packages off their pin (attempt $attempt): $(echo "$missing" | tr '\n' ' ')"
+    sleep $((attempt * 20))
+  done
+  echo "lake update failed three times. This is a network or toolchain problem, not upstream code; stopping without a pull request."
+  return 1
+}
 : > "$tmp/results.md"
 
 # Clear manifests that earlier Lake runs inside packages left untracked,
@@ -53,8 +83,8 @@ for pkg in .lake/packages/*/; do
   [ -d "$pkg" ] || continue
   git -C "$pkg" ls-files --error-unmatch lake-manifest.json > /dev/null 2>&1 || rm -f "$pkg/lake-manifest.json"
 done
-lake update
-result "\`lake update\`" $?
+update_workspace || exit 1
+result "\`lake update\`" 0
 scripts/build-all.sh "$tmp/failed"
 status=$?
 if [ -s "$tmp/failed" ]; then
@@ -62,7 +92,7 @@ if [ -s "$tmp/failed" ]; then
   echo "Keeping the current pin of: $kept"
   # shellcheck disable=SC2086
   decide --keep-pin $kept --hold-joint > /dev/null || exit 1
-  lake update
+  update_workspace || exit 1
   scripts/build-all.sh
   status=$?
   echo "- These repos failed to build at their new head, so each keeps its current pin, or stays out of the workspace if it is new: $kept." >> "$tmp/results.md"
