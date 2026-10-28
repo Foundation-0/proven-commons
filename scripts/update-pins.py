@@ -33,14 +33,33 @@ pattern = re.compile(
 
 
 def head_sha(repo: str) -> str:
-    out = subprocess.run(
-        ["git", "ls-remote", f"https://github.com/Proven-Commons/{repo}.git", "HEAD"],
-        capture_output=True, text=True, check=True, timeout=60,
-    ).stdout
-    return out.split()[0]
+    try:
+        out = subprocess.run(
+            ["git", "ls-remote", f"https://github.com/Proven-Commons/{repo}.git", "HEAD"],
+            capture_output=True, text=True, check=True, timeout=60,
+        ).stdout
+    except subprocess.CalledProcessError as e:
+        reason = ((e.stderr or "") + (e.stdout or "")).strip() or f"git exited with status {e.returncode}"
+        print(f"Failed to fetch HEAD for repository '{repo}': {reason}", file=sys.stderr)
+        sys.exit(1)
+    except subprocess.TimeoutExpired:
+        print(f"Failed to fetch HEAD for repository '{repo}': timed out after 60s", file=sys.stderr)
+        sys.exit(1)
+    try:
+        return out.split()[0]
+    except IndexError:
+        print(f"Failed to fetch HEAD for repository '{repo}': empty response from ls-remote", file=sys.stderr)
+        sys.exit(1)
 
 
 changed = False
+
+# Report require blocks the pin pattern does not cover so none are silently skipped.
+require_re = re.compile(r'\[\[require\]\]\nname = "([^"]+)"\ngit = "([^"]+)"\nrev = "([^"]+)"')
+for req in require_re.finditer(text):
+    req_name, git_url = req.group(1), req.group(2)
+    if not pattern.search(req.group(0)):
+        print(f"Skipped {req_name}: git URL {git_url} did not match Proven-Commons pin pattern; leaving pin unchanged.")
 
 
 def replace(match: re.Match) -> str:
