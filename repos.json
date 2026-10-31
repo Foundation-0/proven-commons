@@ -1,7 +1,7 @@
 {
   "org": "Proven-Commons",
   "toolchain": "leanprover/lean4:v4.35.0",
-  "synced": "2026-10-27",
+  "synced": "2026-10-31",
   "repos": [
     {
       "repo": "bech32",
@@ -9,18 +9,61 @@
       "description": "Lean rewrite - bech32: Bech32 and Bech32m strings (BIP 173, BIP 350)",
       "archived": false,
       "branch": "main",
-      "license": null,
-      "state": "pending",
-      "reason": "no lakefile on its default branch"
+      "head": "a69fc6e07a43a7ea4ea578140788b77d11dc5a99",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "bech32",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Bech32",
+          "kind": "main",
+          "roots": [
+            "Bech32"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        },
+        {
+          "name": "Proofs",
+          "kind": "proofs",
+          "roots": [
+            "Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Bech32",
+        "Proofs",
+        "Spec"
+      ],
+      "main_namespaces": [
+        "Bech32"
+      ],
+      "proof_namespaces": [
+        "Bech32",
+        "Proofs",
+        "Spec"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 15,
+      "rev": "a69fc6e07a43a7ea4ea578140788b77d11dc5a99",
+      "joint_proofs": false
     },
     {
       "repo": "bencode",
       "url": "https://github.com/Proven-Commons/bencode",
-      "description": "Lean Bencode parser",
+      "description": "lean Bencode parser",
       "archived": false,
       "branch": "main",
-      "head": "de718a10ccbbd837c8b9eda32674254db7cf619a",
-      "license": null,
+      "head": "dcaa91d827096d57e424f28af6465ce106017972",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "bencode",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -33,10 +76,72 @@
           ]
         },
         {
-          "name": "Spec",
+          "name": "BencodeSpec",
           "kind": "spec",
           "roots": [
-            "Spec"
+            "Bencode.Spec"
+          ]
+        },
+        {
+          "name": "BencodeProofs",
+          "kind": "proofs",
+          "roots": [
+            "Bencode.Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Bencode"
+      ],
+      "main_namespaces": [
+        "Bencode"
+      ],
+      "proof_namespaces": [
+        "Bencode"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 23,
+      "rev": "dcaa91d827096d57e424f28af6465ce106017972",
+      "joint_proofs": true
+    },
+    {
+      "repo": "cbor",
+      "url": "https://github.com/Proven-Commons/cbor",
+      "description": "lean CBOR decoder (RFC 8949)",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "top-level module Spec is also used by rfc"
+    },
+    {
+      "repo": "cedar",
+      "url": "https://github.com/Proven-Commons/cedar",
+      "description": "Lean Cedar-style policy engine: permit and forbid decisions",
+      "archived": false,
+      "branch": "main",
+      "license": null,
+      "state": "pending",
+      "reason": "no lakefile on its default branch"
+    },
+    {
+      "repo": "clienthello",
+      "url": "https://github.com/Proven-Commons/clienthello",
+      "description": "Lean TLS ClientHello parser (RFC 8446, section 4.1.2)",
+      "archived": false,
+      "branch": "main",
+      "head": "abcc7aa36200354b1310e96165c8de20a96851c9",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "clienthello",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "ClientHello",
+          "kind": "main",
+          "roots": [
+            "ClientHello"
           ]
         },
         {
@@ -45,45 +150,42 @@
           "roots": [
             "Proofs"
           ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Bencode",
+        "ClientHello",
         "Proofs",
         "Spec"
       ],
       "main_namespaces": [
-        "Bencode"
+        "ClientHello"
       ],
       "proof_namespaces": [
-        "Bencode",
+        "ClientHello",
         "Proofs",
         "Spec"
       ],
       "bar": "in-progress",
-      "spec_theorems": 23,
-      "rev": "de718a10ccbbd837c8b9eda32674254db7cf619a",
+      "spec_theorems": 37,
+      "rev": "abcc7aa36200354b1310e96165c8de20a96851c9",
       "joint_proofs": false
-    },
-    {
-      "repo": "cbor",
-      "url": "https://github.com/Proven-Commons/cbor",
-      "description": "Lean CBOR decoder (RFC 8949)",
-      "archived": false,
-      "branch": "main",
-      "license": null,
-      "state": "pending",
-      "reason": "no lakefile on its default branch"
     },
     {
       "repo": "codec",
       "url": "https://github.com/Proven-Commons/codec",
-      "description": "Lean codec",
+      "description": "lean codec",
       "archived": false,
       "branch": "main",
-      "head": "74ae50b94b14dcf2c916865b6e7a95b42fabed9e",
-      "license": null,
+      "head": "860b895c1a6449506d99f4b8b6c9dd8a9c5117e6",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "codec",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -96,47 +198,43 @@
           ]
         },
         {
-          "name": "Spec",
+          "name": "CodecSpec",
           "kind": "spec",
           "roots": [
-            "Spec"
+            "Codec.Spec"
           ]
         },
         {
-          "name": "Proofs",
+          "name": "CodecProofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Codec.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Codec",
-        "Proofs",
-        "Spec"
+        "Codec"
       ],
       "main_namespaces": [
         "Codec"
       ],
       "proof_namespaces": [
-        "Codec",
-        "Proofs",
-        "Spec"
+        "Codec"
       ],
       "bar": "in-progress",
       "spec_theorems": 37,
-      "rev": "74ae50b94b14dcf2c916865b6e7a95b42fabed9e",
-      "joint_proofs": false
+      "rev": "860b895c1a6449506d99f4b8b6c9dd8a9c5117e6",
+      "joint_proofs": true
     },
     {
       "repo": "csv",
       "url": "https://github.com/Proven-Commons/csv",
-      "description": "Lean CSV parser and printer (RFC 4180)",
+      "description": "lean CSV parser and printer (RFC 4180)",
       "archived": false,
       "branch": "main",
-      "head": "4ceedb42f999cc35a6a606396d866a3a69961e78",
-      "license": null,
+      "head": "9d15dc85f786e7b99b2bb6c6e6b72db79ee1c9b4",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "csv",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -149,38 +247,56 @@
           ]
         },
         {
-          "name": "Proofs",
+          "name": "CsvProofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Csv.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Csv",
-        "Proofs"
+        "Csv"
       ],
       "main_namespaces": [
         "Csv"
       ],
       "proof_namespaces": [
-        "Csv",
-        "Proofs"
+        "Csv"
       ],
       "bar": null,
       "spec_theorems": null,
-      "rev": "4ceedb42f999cc35a6a606396d866a3a69961e78",
-      "joint_proofs": false
+      "rev": "9d15dc85f786e7b99b2bb6c6e6b72db79ee1c9b4",
+      "joint_proofs": true
+    },
+    {
+      "repo": "der",
+      "url": "https://github.com/Proven-Commons/der",
+      "description": "Lean ASN.1 DER element reader (X.690)",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "top-level module Spec is also used by rfc"
+    },
+    {
+      "repo": "dhcpv4",
+      "url": "https://github.com/Proven-Commons/dhcpv4",
+      "description": "Lean DHCPv4 wire message parser",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "no lakefile on its default branch"
     },
     {
       "repo": "dns",
       "url": "https://github.com/Proven-Commons/dns",
-      "description": "Lean DNS wire header and question parser (RFC 1035)",
+      "description": "lean DNS wire header and question parser (RFC 1035)",
       "archived": false,
       "branch": "main",
-      "head": "a7cad62c0164cd0c1ba5ba4c838e11472741dea1",
-      "license": null,
+      "head": "915383c5bebbe6fb197c943d79fce074af3c287e",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "dns",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -193,6 +309,55 @@
           ]
         },
         {
+          "name": "DnsProofs",
+          "kind": "proofs",
+          "roots": [
+            "Dns.Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Dns"
+      ],
+      "main_namespaces": [
+        "Dns"
+      ],
+      "proof_namespaces": [
+        "Dns"
+      ],
+      "bar": null,
+      "spec_theorems": null,
+      "rev": "915383c5bebbe6fb197c943d79fce074af3c287e",
+      "joint_proofs": true
+    },
+    {
+      "repo": "hostname",
+      "url": "https://github.com/Proven-Commons/hostname",
+      "description": "Lean hostname",
+      "archived": false,
+      "branch": "main",
+      "head": "6ccb18b0a0406a7d3c84e05d70e1236093803bbb",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "hostname",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Hostname",
+          "kind": "main",
+          "roots": [
+            "Hostname"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        },
+        {
           "name": "Proofs",
           "kind": "proofs",
           "roots": [
@@ -202,49 +367,94 @@
       ],
       "requires": [],
       "namespaces": [
-        "Dns",
-        "Proofs"
+        "Hostname",
+        "Proofs",
+        "Spec"
       ],
       "main_namespaces": [
-        "Dns"
+        "Hostname"
       ],
       "proof_namespaces": [
-        "Dns",
-        "Proofs"
+        "Hostname",
+        "Proofs",
+        "Spec"
       ],
-      "bar": null,
-      "spec_theorems": null,
-      "rev": "a7cad62c0164cd0c1ba5ba4c838e11472741dea1",
+      "bar": "in-progress",
+      "spec_theorems": 22,
+      "rev": "6ccb18b0a0406a7d3c84e05d70e1236093803bbb",
       "joint_proofs": false
     },
     {
-      "repo": "hostname",
-      "url": "https://github.com/Proven-Commons/hostname",
-      "description": "Lean hostname",
+      "repo": "hpack",
+      "url": "https://github.com/Proven-Commons/hpack",
+      "description": "Lean HPACK stateless part (RFC 7541): prefix integers, Huffman strings, static table",
       "archived": false,
       "branch": "main",
-      "license": null,
-      "state": "pending",
-      "reason": "no lakefile on its default branch"
+      "head": "1c0d17cacbb62dfb6a1e5a523eb8556f55331e39",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "hpack",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Hpack",
+          "kind": "main",
+          "roots": [
+            "Hpack"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        },
+        {
+          "name": "Proofs",
+          "kind": "proofs",
+          "roots": [
+            "Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Hpack",
+        "Proofs",
+        "Spec"
+      ],
+      "main_namespaces": [
+        "Hpack"
+      ],
+      "proof_namespaces": [
+        "Hpack",
+        "Proofs",
+        "Spec"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 17,
+      "rev": "1c0d17cacbb62dfb6a1e5a523eb8556f55331e39",
+      "joint_proofs": false
     },
     {
       "repo": "http",
       "url": "https://github.com/Proven-Commons/http",
-      "description": "Lean HTTP request-line and header parser (RFC 9112)",
+      "description": "lean HTTP request-line and header parser (RFC 9112)",
       "archived": false,
       "branch": "main",
-      "license": null,
+      "license": "Apache-2.0",
       "state": "pending",
       "reason": "no lakefile on its default branch"
     },
     {
       "repo": "ip",
       "url": "https://github.com/Proven-Commons/ip",
-      "description": "Lean IP address parser and canonical printer",
+      "description": "lean IP address parser and canonical printer",
       "archived": false,
       "branch": "main",
-      "head": "09f2a06fddccb8bdace48de5672eef3e8c2ce4f2",
-      "license": null,
+      "head": "7243f5a6108e11ffa8a40c35d5d4984d686356a0",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "ip",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -257,38 +467,36 @@
           ]
         },
         {
-          "name": "Proofs",
+          "name": "IpProofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Ip.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Ip",
-        "Proofs"
+        "Ip"
       ],
       "main_namespaces": [
         "Ip"
       ],
       "proof_namespaces": [
-        "Ip",
-        "Proofs"
+        "Ip"
       ],
       "bar": null,
       "spec_theorems": null,
-      "rev": "09f2a06fddccb8bdace48de5672eef3e8c2ce4f2",
-      "joint_proofs": false
+      "rev": "7243f5a6108e11ffa8a40c35d5d4984d686356a0",
+      "joint_proofs": true
     },
     {
       "repo": "json",
       "url": "https://github.com/Proven-Commons/json",
-      "description": "Lean JSON",
+      "description": "lean json",
       "archived": false,
       "branch": "main",
-      "head": "4642e51aa9d3e8f566b06707e7ec3537a799117c",
-      "license": null,
+      "head": "4ff8eb6483e21ec87da03a80abdb0af45ba9b7f2",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "json",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -301,6 +509,187 @@
           ]
         },
         {
+          "name": "JsonSpec",
+          "kind": "spec",
+          "roots": [
+            "Json.Spec"
+          ]
+        },
+        {
+          "name": "JsonProofs",
+          "kind": "proofs",
+          "roots": [
+            "Json.Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Json"
+      ],
+      "main_namespaces": [
+        "Json"
+      ],
+      "proof_namespaces": [
+        "Json"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 16,
+      "rev": "4ff8eb6483e21ec87da03a80abdb0af45ba9b7f2",
+      "joint_proofs": true
+    },
+    {
+      "repo": "jws",
+      "url": "https://github.com/Proven-Commons/jws",
+      "description": "Lean JWS compact serialization parser and claim checks",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "top-level module Json is also used by json"
+    },
+    {
+      "repo": "messagepack",
+      "url": "https://github.com/Proven-Commons/messagepack",
+      "description": "lean MessagePack decoder",
+      "archived": false,
+      "branch": "main",
+      "head": "1dc7b3cb470dac712bf2245d70d76659dbff880c",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "messagepack",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "MessagePack",
+          "kind": "main",
+          "roots": [
+            "MessagePack"
+          ]
+        },
+        {
+          "name": "Proofs",
+          "kind": "proofs",
+          "roots": [
+            "Proofs"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "MessagePack",
+        "Proofs",
+        "Spec"
+      ],
+      "main_namespaces": [
+        "MessagePack"
+      ],
+      "proof_namespaces": [
+        "MessagePack",
+        "Proofs"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 13,
+      "rev": "1dc7b3cb470dac712bf2245d70d76659dbff880c",
+      "joint_proofs": false
+    },
+    {
+      "repo": "mqtt",
+      "url": "https://github.com/Proven-Commons/mqtt",
+      "description": "Lean MQTT 5.0 packet framing",
+      "archived": false,
+      "branch": "main",
+      "head": "904310e58f37626341660959ed23222379562319",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "mqtt",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Mqtt",
+          "kind": "main",
+          "roots": [
+            "Mqtt"
+          ]
+        },
+        {
+          "name": "Proofs",
+          "kind": "proofs",
+          "roots": [
+            "Proofs"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Mqtt",
+        "Proofs",
+        "Spec"
+      ],
+      "main_namespaces": [
+        "Mqtt"
+      ],
+      "proof_namespaces": [
+        "Mqtt",
+        "Proofs",
+        "Spec"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 37,
+      "rev": "904310e58f37626341660959ed23222379562319",
+      "joint_proofs": false
+    },
+    {
+      "repo": "ntp",
+      "url": "https://github.com/Proven-Commons/ntp",
+      "description": "Lean NTP wire packet parser",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "top-level module Spec is also used by rfc"
+    },
+    {
+      "repo": "path",
+      "url": "https://github.com/Proven-Commons/path",
+      "description": "Lean lexical path cleaning (Go path.Clean rules)",
+      "archived": false,
+      "branch": "main",
+      "head": "41e5ffdba9f450f8b5280b4cc2bd1cace3029fd9",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "path",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Path",
+          "kind": "main",
+          "roots": [
+            "Path"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        },
+        {
           "name": "Proofs",
           "kind": "proofs",
           "roots": [
@@ -310,39 +699,31 @@
       ],
       "requires": [],
       "namespaces": [
-        "Json",
-        "Proofs"
+        "Path",
+        "Proofs",
+        "Spec"
       ],
       "main_namespaces": [
-        "Json"
+        "Path"
       ],
       "proof_namespaces": [
-        "Json",
-        "Proofs"
+        "Path",
+        "Proofs",
+        "Spec"
       ],
-      "bar": null,
-      "spec_theorems": null,
-      "rev": "4642e51aa9d3e8f566b06707e7ec3537a799117c",
+      "bar": "in-progress",
+      "spec_theorems": 10,
+      "rev": "41e5ffdba9f450f8b5280b4cc2bd1cace3029fd9",
       "joint_proofs": false
-    },
-    {
-      "repo": "messagepack",
-      "url": "https://github.com/Proven-Commons/messagepack",
-      "description": "Lean MessagePack decoder",
-      "archived": false,
-      "branch": "main",
-      "license": null,
-      "state": "pending",
-      "reason": "no lakefile on its default branch"
     },
     {
       "repo": "pep440",
       "url": "https://github.com/Proven-Commons/pep440",
-      "description": "Lean PEP 440 version parser and precedence",
+      "description": "lean PEP 440 version parser and precedence",
       "archived": false,
       "branch": "main",
-      "head": "3ab869050a0625b0cb889c44e0cf215799d67f6c",
-      "license": null,
+      "head": "873bd0fe38b33be95bde78a5adf8b72764e67677",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "pep440",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -355,38 +736,36 @@
           ]
         },
         {
-          "name": "Proofs",
+          "name": "Pep440Proofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Pep440.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Pep440",
-        "Proofs"
+        "Pep440"
       ],
       "main_namespaces": [
         "Pep440"
       ],
       "proof_namespaces": [
-        "Pep440",
-        "Proofs"
+        "Pep440"
       ],
       "bar": null,
       "spec_theorems": null,
-      "rev": "3ab869050a0625b0cb889c44e0cf215799d67f6c",
-      "joint_proofs": false
+      "rev": "873bd0fe38b33be95bde78a5adf8b72764e67677",
+      "joint_proofs": true
     },
     {
       "repo": "png",
       "url": "https://github.com/Proven-Commons/png",
-      "description": "Lean PNG chunk parser with CRC-32 check",
+      "description": "lean PNG chunk parser with CRC-32 check",
       "archived": false,
       "branch": "main",
-      "head": "df3035120ec6a42abb42e75b496e66cb5f2cb5fb",
-      "license": null,
+      "head": "2447469106774beea9f809f4b6f8efd6cb3086cd",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "png",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -399,38 +778,36 @@
           ]
         },
         {
-          "name": "Proofs",
+          "name": "PngProofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Png.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Png",
-        "Proofs"
+        "Png"
       ],
       "main_namespaces": [
         "Png"
       ],
       "proof_namespaces": [
-        "Png",
-        "Proofs"
+        "Png"
       ],
       "bar": null,
       "spec_theorems": null,
-      "rev": "df3035120ec6a42abb42e75b496e66cb5f2cb5fb",
-      "joint_proofs": false
+      "rev": "2447469106774beea9f809f4b6f8efd6cb3086cd",
+      "joint_proofs": true
     },
     {
       "repo": "protobuf",
       "url": "https://github.com/Proven-Commons/protobuf",
-      "description": "Lean Protobuf wire format codec",
+      "description": "lean Protobuf wire format codec",
       "archived": false,
       "branch": "main",
-      "head": "babcab706e425b670da74b3ea0de1e9e4a0e61fb",
-      "license": null,
+      "head": "78a20edd8e689851835b1c5c3fb77a3b0e689f80",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "protobuf",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -440,6 +817,55 @@
           "kind": "main",
           "roots": [
             "Protobuf"
+          ]
+        },
+        {
+          "name": "ProtobufSpec",
+          "kind": "spec",
+          "roots": [
+            "Protobuf.Spec"
+          ]
+        },
+        {
+          "name": "ProtobufProofs",
+          "kind": "proofs",
+          "roots": [
+            "Protobuf.Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Protobuf"
+      ],
+      "main_namespaces": [
+        "Protobuf"
+      ],
+      "proof_namespaces": [
+        "Protobuf"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 11,
+      "rev": "78a20edd8e689851835b1c5c3fb77a3b0e689f80",
+      "joint_proofs": true
+    },
+    {
+      "repo": "punycode",
+      "url": "https://github.com/Proven-Commons/punycode",
+      "description": "Lean punycode",
+      "archived": false,
+      "branch": "main",
+      "head": "767ad95be1760c70d4867865027f9678eae6bd85",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "punycode",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Punycode",
+          "kind": "main",
+          "roots": [
+            "Punycode"
           ]
         },
         {
@@ -460,40 +886,30 @@
       "requires": [],
       "namespaces": [
         "Proofs",
-        "Protobuf",
+        "Punycode",
         "Spec"
       ],
       "main_namespaces": [
-        "Protobuf"
+        "Punycode"
       ],
       "proof_namespaces": [
         "Proofs",
-        "Protobuf",
+        "Punycode",
         "Spec"
       ],
       "bar": "in-progress",
-      "spec_theorems": 11,
-      "rev": "babcab706e425b670da74b3ea0de1e9e4a0e61fb",
+      "spec_theorems": 9,
+      "rev": "767ad95be1760c70d4867865027f9678eae6bd85",
       "joint_proofs": false
-    },
-    {
-      "repo": "punycode",
-      "url": "https://github.com/Proven-Commons/punycode",
-      "description": "Lean punycode",
-      "archived": false,
-      "branch": "main",
-      "license": null,
-      "state": "pending",
-      "reason": "no lakefile on its default branch"
     },
     {
       "repo": "redis",
       "url": "https://github.com/Proven-Commons/redis",
-      "description": "Lean Redis",
+      "description": "Lean redis",
       "archived": false,
       "branch": "main",
-      "head": "7ff41f249a9236f75911c002e9c1052349781f13",
-      "license": null,
+      "head": "072ee45f118dd77aa42dee8f54100a8666075b7a",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "resp",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -516,17 +932,17 @@
       "proof_namespaces": [],
       "bar": null,
       "spec_theorems": null,
-      "rev": "7ff41f249a9236f75911c002e9c1052349781f13",
+      "rev": "072ee45f118dd77aa42dee8f54100a8666075b7a",
       "joint_proofs": false
     },
     {
       "repo": "rfc",
       "url": "https://github.com/Proven-Commons/rfc",
-      "description": "Lean RFC 3339 timestamp parser",
+      "description": "lean RFC 3339 timestamp parser",
       "archived": false,
       "branch": "main",
-      "head": "79f30cd0fbbd01ecfcf10bd8c98693fe8daf4238",
-      "license": null,
+      "head": "7ca89c914c9d9dcba41fd5db4ec52ce87de0ca41",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "rfc3339",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -569,17 +985,17 @@
       ],
       "bar": "in-progress",
       "spec_theorems": 32,
-      "rev": "79f30cd0fbbd01ecfcf10bd8c98693fe8daf4238",
+      "rev": "7ca89c914c9d9dcba41fd5db4ec52ce87de0ca41",
       "joint_proofs": false
     },
     {
       "repo": "semver",
       "url": "https://github.com/Proven-Commons/semver",
-      "description": "Lean semver",
+      "description": "lean semver",
       "archived": false,
       "branch": "main",
-      "head": "df74c98d5521710895d90a216fa5cad1c31e44f6",
-      "license": null,
+      "head": "67c70edde6b47e7ed46ed049aa5d058332948321",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "semver",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -592,10 +1008,62 @@
           ]
         },
         {
-          "name": "Spec",
+          "name": "SemVerSpec",
           "kind": "spec",
           "roots": [
-            "Spec"
+            "SemVer.Spec"
+          ]
+        },
+        {
+          "name": "SemVerProofs",
+          "kind": "proofs",
+          "roots": [
+            "SemVer.Proofs"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "SemVer"
+      ],
+      "main_namespaces": [
+        "SemVer"
+      ],
+      "proof_namespaces": [
+        "SemVer"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 16,
+      "rev": "67c70edde6b47e7ed46ed049aa5d058332948321",
+      "joint_proofs": true
+    },
+    {
+      "repo": "sqlite",
+      "url": "https://github.com/Proven-Commons/sqlite",
+      "description": "Lean SQLite file format reader: header, pages, records",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "top-level module Spec is also used by rfc"
+    },
+    {
+      "repo": "ssh",
+      "url": "https://github.com/Proven-Commons/ssh",
+      "description": "Lean ssh rewrite",
+      "archived": false,
+      "branch": "main",
+      "head": "3f6169b690b59b002613c3527a7800fd62b281bf",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "ssh",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Ssh",
+          "kind": "main",
+          "roots": [
+            "Ssh"
           ]
         },
         {
@@ -604,35 +1072,41 @@
           "roots": [
             "Proofs"
           ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
         }
       ],
       "requires": [],
       "namespaces": [
         "Proofs",
-        "SemVer",
-        "Spec"
+        "Spec",
+        "Ssh"
       ],
       "main_namespaces": [
-        "SemVer"
+        "Ssh"
       ],
       "proof_namespaces": [
         "Proofs",
-        "SemVer",
-        "Spec"
+        "Ssh"
       ],
       "bar": "in-progress",
-      "spec_theorems": 16,
-      "rev": "df74c98d5521710895d90a216fa5cad1c31e44f6",
+      "spec_theorems": 37,
+      "rev": "3f6169b690b59b002613c3527a7800fd62b281bf",
       "joint_proofs": false
     },
     {
       "repo": "tar",
       "url": "https://github.com/Proven-Commons/tar",
-      "description": "Lean-verified tar (ustar) extractor with a proved no-escape extraction gate",
+      "description": "Lean-verified tar (ustar) extractor with a proved no-escape extraction gate. A Proven Commons project.",
       "archived": false,
       "branch": "main",
-      "head": "7517a86223e6741b0a6b5c0b3b0fabcf68347bee",
-      "license": null,
+      "head": "9012f46eec2e218bfc458c415e48f734152aa172",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "tar-pilot",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -655,17 +1129,17 @@
       "proof_namespaces": [],
       "bar": null,
       "spec_theorems": null,
-      "rev": "7517a86223e6741b0a6b5c0b3b0fabcf68347bee",
+      "rev": "9012f46eec2e218bfc458c415e48f734152aa172",
       "joint_proofs": false
     },
     {
       "repo": "toml",
       "url": "https://github.com/Proven-Commons/toml",
-      "description": "Lean TOML parser and printer",
+      "description": "lean TOML parser and printer",
       "archived": false,
       "branch": "main",
-      "head": "ca8a615c0492e7717034ef33b602a1bf13fbc298",
-      "license": null,
+      "head": "e38687b8c0c2c377e46c5a9d9c2e87d7200fe1df",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "toml",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -678,38 +1152,46 @@
           ]
         },
         {
-          "name": "Proofs",
+          "name": "TomlProofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Toml.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Proofs",
         "Toml"
       ],
       "main_namespaces": [
         "Toml"
       ],
       "proof_namespaces": [
-        "Proofs",
         "Toml"
       ],
       "bar": null,
       "spec_theorems": null,
-      "rev": "ca8a615c0492e7717034ef33b602a1bf13fbc298",
-      "joint_proofs": false
+      "rev": "e38687b8c0c2c377e46c5a9d9c2e87d7200fe1df",
+      "joint_proofs": true
+    },
+    {
+      "repo": "uri",
+      "url": "https://github.com/Proven-Commons/uri",
+      "description": "Lean URI reference resolution (RFC 3986, sections 3 and 5.2)",
+      "archived": false,
+      "branch": "main",
+      "license": "Apache-2.0",
+      "state": "pending",
+      "reason": "no lakefile on its default branch"
     },
     {
       "repo": "utf",
       "url": "https://github.com/Proven-Commons/utf",
-      "description": "Lean UTF-8 codec",
+      "description": "lean UTF-8 codec",
       "archived": false,
       "branch": "main",
-      "head": "276115161f6c33f3b6f80436ebe07474fe5085e9",
-      "license": null,
+      "head": "2cdbc294327a5c7c07fe731b351c06f81578cb47",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "utf8",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -762,17 +1244,17 @@
       ],
       "bar": "in-progress",
       "spec_theorems": 35,
-      "rev": "276115161f6c33f3b6f80436ebe07474fe5085e9",
+      "rev": "2cdbc294327a5c7c07fe731b351c06f81578cb47",
       "joint_proofs": false
     },
     {
       "repo": "uuid",
       "url": "https://github.com/Proven-Commons/uuid",
-      "description": "Lean UUID parser and printer (RFC 9562)",
+      "description": "lean UUID parser and printer (RFC 9562)",
       "archived": false,
       "branch": "main",
-      "head": "b5478df3c95bb4117781cba4ebe908d8cf067062",
-      "license": null,
+      "head": "956d8cef465b9e66b74fc76ba4e7066b4572715c",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "uuid",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -785,38 +1267,36 @@
           ]
         },
         {
-          "name": "Proofs",
+          "name": "UuidProofs",
           "kind": "proofs",
           "roots": [
-            "Proofs"
+            "Uuid.Proofs"
           ]
         }
       ],
       "requires": [],
       "namespaces": [
-        "Proofs",
         "Uuid"
       ],
       "main_namespaces": [
         "Uuid"
       ],
       "proof_namespaces": [
-        "Proofs",
         "Uuid"
       ],
       "bar": null,
       "spec_theorems": null,
-      "rev": "b5478df3c95bb4117781cba4ebe908d8cf067062",
-      "joint_proofs": false
+      "rev": "956d8cef465b9e66b74fc76ba4e7066b4572715c",
+      "joint_proofs": true
     },
     {
       "repo": "websocket",
       "url": "https://github.com/Proven-Commons/websocket",
-      "description": "Lean WebSocket frame parser (RFC 6455, section 5)",
+      "description": "lean WebSocket frame parser (RFC 6455, section 5)",
       "archived": false,
       "branch": "main",
-      "head": "b8db7cd364286818d88f5fdb358079943bc4d189",
-      "license": null,
+      "head": "ecd4a26456e7ba108b797dd3beec7c41fd014551",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "websocket",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -839,17 +1319,69 @@
       "proof_namespaces": [],
       "bar": null,
       "spec_theorems": null,
-      "rev": "b8db7cd364286818d88f5fdb358079943bc4d189",
+      "rev": "ecd4a26456e7ba108b797dd3beec7c41fd014551",
+      "joint_proofs": false
+    },
+    {
+      "repo": "xml",
+      "url": "https://github.com/Proven-Commons/xml",
+      "description": "Lean XML safe subset parser (no document type declarations, no entities)",
+      "archived": false,
+      "branch": "main",
+      "head": "71d77b4951d279b6ebdc3b3cf120c25bbfc38ee4",
+      "license": "Apache-2.0",
+      "state": "included",
+      "package": "xml",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "libs": [
+        {
+          "name": "Xml",
+          "kind": "main",
+          "roots": [
+            "Xml"
+          ]
+        },
+        {
+          "name": "Proofs",
+          "kind": "proofs",
+          "roots": [
+            "Proofs"
+          ]
+        },
+        {
+          "name": "Spec",
+          "kind": "spec",
+          "roots": [
+            "Spec"
+          ]
+        }
+      ],
+      "requires": [],
+      "namespaces": [
+        "Proofs",
+        "Spec",
+        "Xml"
+      ],
+      "main_namespaces": [
+        "Xml"
+      ],
+      "proof_namespaces": [
+        "Proofs",
+        "Xml"
+      ],
+      "bar": "in-progress",
+      "spec_theorems": 25,
+      "rev": "71d77b4951d279b6ebdc3b3cf120c25bbfc38ee4",
       "joint_proofs": false
     },
     {
       "repo": "zip",
       "url": "https://github.com/Proven-Commons/zip",
-      "description": "Lean zip",
+      "description": "lean zip",
       "archived": false,
       "branch": "main",
-      "head": "2cf824fde49fb336c217c89190891ddb753cfe10",
-      "license": null,
+      "head": "1cbcc1ffe4c2572d9507286250e5250679d9b0e4",
+      "license": "Apache-2.0",
       "state": "included",
       "package": "zip-pilot",
       "toolchain": "leanprover/lean4:v4.35.0",
@@ -872,7 +1404,7 @@
       "proof_namespaces": [],
       "bar": null,
       "spec_theorems": null,
-      "rev": "2cf824fde49fb336c217c89190891ddb753cfe10",
+      "rev": "1cbcc1ffe4c2572d9507286250e5250679d9b0e4",
       "joint_proofs": false
     }
   ]
