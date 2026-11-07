@@ -8,5 +8,17 @@
 -- the same `Spec.*` theorem names: see issue #4.
 --
 -- Not imported yet, because their module names collide:
--- bencode, codec, csv, dns, ip, json, pep440, png, protobuf, rfc,
--- semver, toml, utf, uuid.
+-- bech32, clienthello, hostname, hpack, messagepack, mqtt, path,
+-- punycode, rfc, ssh, utf, xml.
+import Bencode.Proofs   -- bencode
+import Codec.Proofs     -- codec
+import Csv.Proofs       -- csv
+import Dns.Proofs       -- dns
+import Ip.Proofs        -- ip
+import Json.Proofs      -- json
+import Pep440.Proofs    -- pep440
+import Png.Proofs       -- png
+import Protobuf.Proofs  -- protobuf
+import SemVer.Proofs    -- semver
+import Toml.Proofs      -- toml
+import Uuid.Proofs      -- uuid

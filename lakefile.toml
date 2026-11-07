@@ -11,91 +11,141 @@ name = "Anthology"
 name = "AnthologyProofs"
 
 [[require]]
+name = "bech32"
+git = "https://github.com/Proven-Commons/bech32"
+rev = "a69fc6e07a43a7ea4ea578140788b77d11dc5a99"
+
+[[require]]
 name = "bencode"
 git = "https://github.com/Proven-Commons/bencode"
-rev = "de718a10ccbbd837c8b9eda32674254db7cf619a"
+rev = "dcaa91d827096d57e424f28af6465ce106017972"
+
+[[require]]
+name = "clienthello"
+git = "https://github.com/Proven-Commons/clienthello"
+rev = "abcc7aa36200354b1310e96165c8de20a96851c9"
 
 [[require]]
 name = "codec"
 git = "https://github.com/Proven-Commons/codec"
-rev = "74ae50b94b14dcf2c916865b6e7a95b42fabed9e"
+rev = "860b895c1a6449506d99f4b8b6c9dd8a9c5117e6"
 
 [[require]]
 name = "csv"
 git = "https://github.com/Proven-Commons/csv"
-rev = "4ceedb42f999cc35a6a606396d866a3a69961e78"
+rev = "9d15dc85f786e7b99b2bb6c6e6b72db79ee1c9b4"
 
 [[require]]
 name = "dns"
 git = "https://github.com/Proven-Commons/dns"
-rev = "a7cad62c0164cd0c1ba5ba4c838e11472741dea1"
+rev = "915383c5bebbe6fb197c943d79fce074af3c287e"
+
+[[require]]
+name = "hostname"
+git = "https://github.com/Proven-Commons/hostname"
+rev = "6ccb18b0a0406a7d3c84e05d70e1236093803bbb"
+
+[[require]]
+name = "hpack"
+git = "https://github.com/Proven-Commons/hpack"
+rev = "1c0d17cacbb62dfb6a1e5a523eb8556f55331e39"
 
 [[require]]
 name = "ip"
 git = "https://github.com/Proven-Commons/ip"
-rev = "09f2a06fddccb8bdace48de5672eef3e8c2ce4f2"
+rev = "7243f5a6108e11ffa8a40c35d5d4984d686356a0"
 
 [[require]]
 name = "json"
 git = "https://github.com/Proven-Commons/json"
-rev = "4642e51aa9d3e8f566b06707e7ec3537a799117c"
+rev = "4ff8eb6483e21ec87da03a80abdb0af45ba9b7f2"
+
+[[require]]
+name = "messagepack"
+git = "https://github.com/Proven-Commons/messagepack"
+rev = "1dc7b3cb470dac712bf2245d70d76659dbff880c"
+
+[[require]]
+name = "mqtt"
+git = "https://github.com/Proven-Commons/mqtt"
+rev = "904310e58f37626341660959ed23222379562319"
+
+[[require]]
+name = "path"
+git = "https://github.com/Proven-Commons/path"
+rev = "41e5ffdba9f450f8b5280b4cc2bd1cace3029fd9"
 
 [[require]]
 name = "pep440"
 git = "https://github.com/Proven-Commons/pep440"
-rev = "3ab869050a0625b0cb889c44e0cf215799d67f6c"
+rev = "873bd0fe38b33be95bde78a5adf8b72764e67677"
 
 [[require]]
 name = "png"
 git = "https://github.com/Proven-Commons/png"
-rev = "df3035120ec6a42abb42e75b496e66cb5f2cb5fb"
+rev = "2447469106774beea9f809f4b6f8efd6cb3086cd"
 
 [[require]]
 name = "protobuf"
 git = "https://github.com/Proven-Commons/protobuf"
-rev = "babcab706e425b670da74b3ea0de1e9e4a0e61fb"
+rev = "78a20edd8e689851835b1c5c3fb77a3b0e689f80"
+
+[[require]]
+name = "punycode"
+git = "https://github.com/Proven-Commons/punycode"
+rev = "767ad95be1760c70d4867865027f9678eae6bd85"
 
 [[require]]
 name = "resp"
 git = "https://github.com/Proven-Commons/redis"
-rev = "7ff41f249a9236f75911c002e9c1052349781f13"
+rev = "072ee45f118dd77aa42dee8f54100a8666075b7a"
 
 [[require]]
 name = "rfc3339"
 git = "https://github.com/Proven-Commons/rfc"
-rev = "79f30cd0fbbd01ecfcf10bd8c98693fe8daf4238"
+rev = "7ca89c914c9d9dcba41fd5db4ec52ce87de0ca41"
 
 [[require]]
 name = "semver"
 git = "https://github.com/Proven-Commons/semver"
-rev = "df74c98d5521710895d90a216fa5cad1c31e44f6"
+rev = "67c70edde6b47e7ed46ed049aa5d058332948321"
+
+[[require]]
+name = "ssh"
+git = "https://github.com/Proven-Commons/ssh"
+rev = "3f6169b690b59b002613c3527a7800fd62b281bf"
 
 [[require]]
 name = "tar-pilot"
 git = "https://github.com/Proven-Commons/tar"
-rev = "7517a86223e6741b0a6b5c0b3b0fabcf68347bee"
+rev = "9012f46eec2e218bfc458c415e48f734152aa172"
 
 [[require]]
 name = "toml"
 git = "https://github.com/Proven-Commons/toml"
-rev = "ca8a615c0492e7717034ef33b602a1bf13fbc298"
+rev = "e38687b8c0c2c377e46c5a9d9c2e87d7200fe1df"
 
 [[require]]
 name = "utf8"
 git = "https://github.com/Proven-Commons/utf"
-rev = "276115161f6c33f3b6f80436ebe07474fe5085e9"
+rev = "2cdbc294327a5c7c07fe731b351c06f81578cb47"
 
 [[require]]
 name = "uuid"
 git = "https://github.com/Proven-Commons/uuid"
-rev = "b5478df3c95bb4117781cba4ebe908d8cf067062"
+rev = "956d8cef465b9e66b74fc76ba4e7066b4572715c"
 
 [[require]]
 name = "websocket"
 git = "https://github.com/Proven-Commons/websocket"
-rev = "b8db7cd364286818d88f5fdb358079943bc4d189"
+rev = "ecd4a26456e7ba108b797dd3beec7c41fd014551"
+
+[[require]]
+name = "xml"
+git = "https://github.com/Proven-Commons/xml"
+rev = "71d77b4951d279b6ebdc3b3cf120c25bbfc38ee4"
 
 [[require]]
 name = "zip-pilot"
 git = "https://github.com/Proven-Commons/zip"
-rev = "2cf824fde49fb336c217c89190891ddb753cfe10"
+rev = "1cbcc1ffe4c2572d9507286250e5250679d9b0e4"
