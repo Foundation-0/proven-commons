@@ -52,14 +52,14 @@ def tokenize_lean4(src: str) -> list[Token]:
         nonlocal i, line, col
         for _ in range(k):
             if i < n:
-                line, col = (line + 1, 1) if src[i] == "\\n" else (line, col + 1)
+                line, col = (line + 1, 1) if src[i] == "\n" else (line, col + 1)
                 i += 1
     while i < n:
         ch = src[i]
-        if ch in " \t\r\\n":
+        if ch in " \t\r\n":
             adv(); continue
         if src.startswith("--", i):
-            while i < n and src[i] != "\\n": adv()
+            while i < n and src[i] != "\n": adv()
             continue
         if src.startswith("/-", i):
             depth = 1; adv(2)
@@ -67,7 +67,8 @@ def tokenize_lean4(src: str) -> list[Token]:
                 if src.startswith("/-", i): depth += 1; adv(2)
                 elif src.startswith("-/", i): depth -= 1; adv(2)
                 else: adv()
-            continue        if ch == "r" and i + 1 < n and src[i + 1] in ("#", '"'):
+            continue
+        if ch == "r" and i + 1 < n and src[i + 1] in ("#", '"'):
             j, hashes = i + 1, 0
             while j < n and src[j] == "#": hashes += 1; j += 1
             if j < n and src[j] == '"':
@@ -149,13 +150,14 @@ def compute_pinned_spec_hash(pkg_dir: Path, spec_files: Iterable[str], code_modu
         key = p.relative_to(pkg_dir).as_posix()
         if key in seen: continue
         seen.add(key); raw = p.read_bytes()
-        h.update(f"FILE:{key}:{len(raw)}\\n".encode("utf-8")); h.update(raw); h.update(b"\\n")
+        h.update(f"FILE:{key}:{len(raw)}\n".encode("utf-8")); h.update(raw); h.update(b"\n")
     return h.hexdigest()
 
 def scan_directory(pkg_dir: Path, spec_roots: set[str] | None = None) -> dict[str, list[tuple[int, str]]]:
     spec_roots = spec_roots or set()
     report: dict[str, list[tuple[int, str]]] = {}
-    for path in sorted(pkg_dir.rglob("*.lean")):        rel = path.relative_to(pkg_dir)
+    for path in sorted(pkg_dir.rglob("*.lean")):
+        rel = path.relative_to(pkg_dir)
         if path.is_symlink() or any(p.startswith(".") for p in rel.parts): continue
         module = ".".join(rel.with_suffix("").parts)
         is_spec = module in spec_roots or module.endswith(".Spec") or module == "Spec"
@@ -164,7 +166,7 @@ def scan_directory(pkg_dir: Path, spec_roots: set[str] | None = None) -> dict[st
     return report
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\\n\\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("paths", nargs="*", help="Lean package directories to scan")
     args = ap.parse_args(argv)
     targets: list[Path] = []
@@ -185,4 +187,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-          
