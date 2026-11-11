@@ -224,6 +224,16 @@ native evaluation and so on), and it does not rerun differential tests.
 The "Verified bar" column repeats the status each upstream `bar.toml`
 records.
 
+## Surface audit and upstream verification notes
+
+`scripts/audit.py` checks kernel axioms (`collectAxioms`). To check Lean 4 source-level Verified Bar rules across fetched packages (`notation`, `macro`, `syntax`, `elab`, `infix`, `@[extern]`, `@[implemented_by]`, `@[csimp]`, `unsafe`, `partial`, `opaque`, borrowed FFI `@&`, and `Lean`/`Lake` metaprogramming imports), run:
+
+```
+python3 scripts/surface_audit.py
+```
+
+Upstream Verified Bar v2 reviews, parser-differential findings on `zip` and `tar`, and the `Http.Spec` / `Http.Proofs` RFC 9112 request-framing slice are tracked in [`notes/2026-11-11-bar-reviews-and-http-slice.md`](notes/2026-11-11-bar-reviews-and-http-slice.md).
+
 ## License
 
 This repo's own files are under the Apache License 2.0, in `LICENSE`.
